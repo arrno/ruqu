@@ -35,8 +35,8 @@ struct MYSQLBuilder<'a> {
     from: Option<Col>,
     select: Option<Select>,
     joins: Vec<JoinClause<'a>>,
-    r#where: Option<Where<'a>>,
-    order: Option<Order>,
+    r#where: Vec<Where<'a>>,
+    order: Option<OrderClause<'a>>,
 }
 
 // TODO impl QueryBuilder
@@ -47,7 +47,7 @@ impl MYSQLBuilder<'_> {
             from: None,
             select: None,
             joins: vec![],
-            r#where: None,
+            r#where: vec![],
             order: None,
         }
     }
