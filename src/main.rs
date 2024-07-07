@@ -1,3 +1,5 @@
+use serde_json::error;
+
 fn main() {
     let qb = MYSQLBuilder::new();
     woop(Box::new("thing"));
@@ -56,16 +58,58 @@ struct MYSQLBuilder<'a> {
 impl MYSQLBuilder<'_> {
     fn new() -> Self {
         MYSQLBuilder {
-            from: None,
             select: None,
+            from: None,
             joins: vec![],
             r#where: vec![],
             order: None,
         }
     }
-    // TODO
+    
     fn try_to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>> {
-        Ok(("".to_string(), vec![]))
+        let (mut query, mut args) = self.unpack_element(&self.select);
+        let (from_query, from_args) = self.unpack_element(&self.from);
+        query.push_str(format!("\n{from_query}").as_str());
+        args.extend(from_args);
+        for join in &self.joins {
+            let (join_query, join_args) = self.unpack_element_ref(&Some(join));
+            query.push_str(format!("\n{join_query}").as_str());
+            args.extend(join_args);
+        }
+        for r#where in &self.r#where {
+            let (where_query, where_args) = self.unpack_element_ref(&Some(r#where));
+            query.push_str(format!("\n{where_query}").as_str());
+            args.extend(where_args);
+        }
+        let (order_query, order_args) = self.unpack_element(&self.order);
+        query.push_str(format!("\n{order_query}").as_str());
+        args.extend(order_args);
+        Ok((query, args))
+    }
+
+    fn unpack_element<T: ToSQL>(&self, element: &Option<T>) -> (String, Vec<Arg>) {
+        match &element {
+            Some(value) => {
+                let (q, a) = value.to_sql();
+                match a {
+                    Some(v) => (q, v),
+                    None => (q, vec![]),
+                }
+            }
+            None => (String::from(""), vec![]),
+        }
+    }
+    fn unpack_element_ref<T: ToSQL>(&self, element: &Option<&T>) -> (String, Vec<Arg>) {
+        match &element {
+            Some(value) => {
+                let (q, a) = value.to_sql();
+                match a {
+                    Some(v) => (q, v),
+                    None => (q, vec![]),
+                }
+            }
+            None => (String::from(""), vec![]),
+        }
     }
 }
 
@@ -74,8 +118,25 @@ trait ToSQL {
 }
 
 // TODO
-struct Select {}
-
+struct Select {
+    cols: Vec<Col>,
+}
+impl ToSQL for Select {
+    fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
+        let mut query = String::from("SELECT ");
+        let mut selects = Vec::new();
+        let mut args = Vec::new();
+        self.cols.iter().for_each(|col| {
+            let (col_query, col_args_op) = col.to_sql();
+            selects.push(col_query);
+            if let Some(col_args) = col_args_op {
+                args.extend(col_args);
+            }
+        });
+        query.push_str(selects.join(", ").as_str());
+        (query, Some(args))
+    }
+}
 #[derive(Clone)]
 enum Join {
     Inner,
@@ -313,6 +374,7 @@ impl ToSQL for Or<'_> {
 enum ExpTar<'a> {
     Arg(Arg),
     Col(&'a Col),
+    Table(MYSQLBuilder<'a>),
 }
 
 impl ToSQL for ExpTar<'_> {
@@ -331,6 +393,10 @@ impl ToSQL for ExpTar<'_> {
             }
             ExpTar::Arg(arg) => (String::from("?"), Some(vec![arg.clone()])),
             ExpTar::Col(col) => (col.to_sql().0, None),
+            ExpTar::Table(sub_query_builder) => {
+                let (sub_query, sub_args) = sub_query_builder.try_to_sql().unwrap();
+                (format!("({sub_query})"), Some(sub_args))
+            }
         }
     }
 }
