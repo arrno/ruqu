@@ -1,7 +1,13 @@
 fn main() {
     let qb = MYSQLBuilder::new();
+    woop(Box::new("thing"));
+    woop(Box::new(4));
 }
 
+fn woop(thing: Box<dyn erased_serde::Serialize>) {
+    let v = serde_json::to_string(&thing).unwrap();
+    println!("{}", v)
+}
 trait QueryBuilder {
     fn from(self) -> Self;
     fn select(self) -> Self;
@@ -13,24 +19,30 @@ trait QueryBuilder {
     fn to_sql(&self) -> (String, Vec<Arg>);
 }
 
+struct ArgIn(Box<dyn erased_serde::Serialize>);
+
 enum Arg {
-    Usize(usize),
-    Isize(isize),
+    Uint(usize),
+    Int(isize),
     Bool(bool),
     String(String),
     Float(f64),
+    Set(Vec<Arg>),
+    Null,
 }
 impl Clone for Arg {
     fn clone(&self) -> Self {
         match self {
-            Arg::Usize(v) => Arg::Usize(*v),
-            Arg::Isize(v) => Arg::Isize(*v),
+            Arg::Uint(v) => Arg::Uint(*v),
+            Arg::Int(v) => Arg::Int(*v),
             Arg::Bool(v) => Arg::Bool(*v),
             Arg::String(v) => Arg::String(v.clone()),
             Arg::Float(v) => Arg::Float(*v),
+            _ => Arg::Null,
         }
     }
 }
+
 struct MYSQLBuilder<'a> {
     from: Option<Col>,
     select: Option<Select>,
@@ -229,6 +241,9 @@ enum Op {
     Neq,
     Lt,
     Gt,
+    In,
+    Is,
+    IsNot,
 }
 impl ToSQL for Op {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
@@ -237,6 +252,9 @@ impl ToSQL for Op {
             Op::Neq => (String::from("!="), None),
             Op::Lt => (String::from("<"), None),
             Op::Gt => (String::from(">"), None),
+            Op::In => (String::from("IN"), None),
+            Op::Is => (String::from("IS"), None),
+            Op::IsNot => (String::from("IS NOT"), None),
         }
     }
 }
@@ -300,6 +318,17 @@ enum ExpTar<'a> {
 impl ToSQL for ExpTar<'_> {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         match self {
+            ExpTar::Arg(Arg::Null) => (String::from("NULL"), None),
+            ExpTar::Arg(Arg::Set(arg_set)) => {
+                let arg_string: Vec<String> = (0..arg_set.len())
+                    .into_iter()
+                    .map(|_| String::from("?"))
+                    .collect();
+                (
+                    format!("({})", arg_string.join(", ")),
+                    Some(arg_set.iter().map(|arg| arg.clone()).collect()),
+                )
+            }
             ExpTar::Arg(arg) => (String::from("?"), Some(vec![arg.clone()])),
             ExpTar::Col(col) => (col.to_sql().0, None),
         }
