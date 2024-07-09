@@ -1,5 +1,7 @@
 use serde_json::error;
 
+// ---------------- Main -------------------------------
+
 fn main() {
     let qb = MYSQLBuilder::new();
     woop(Box::new("thing"));
@@ -10,19 +12,84 @@ fn woop(thing: Box<dyn erased_serde::Serialize>) {
     let v = serde_json::to_string(&thing).unwrap();
     println!("{}", v)
 }
+
+// ---------------- Traits -------------------------------
+
 trait QueryBuilder {
-    fn from(self) -> Self;
-    fn select(self) -> Self;
-    fn join(self) -> Self;
-    fn left_join(self) -> Self;
-    fn right_join(self) -> Self;
-    fn r#where(self) -> Self;
-    fn order(self) -> Self;
-    fn to_sql(&self) -> (String, Vec<Arg>);
+    fn query() -> Self;
+    fn from(self, col: Col) -> Self;
+    fn select(self, cols: Vec<Col>) -> Self;
+    // fn join(self) -> Self;
+    // fn left_join(self) -> Self;
+    // fn right_join(self) -> Self;
+    // fn r#where(self) -> Self;
+    // fn order(self) -> Self;
+    fn to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>>;
 }
+
+trait ToSQL {
+    fn to_sql(&self) -> (String, Option<Vec<Arg>>);
+}
+
+// ---------------- Args -------------------------------
 
 struct ArgIn(Box<dyn erased_serde::Serialize>);
 
+trait ToArg {
+    fn to_arg(self) -> Arg;
+}
+
+impl ToArg for usize {
+    fn to_arg(self) -> Arg {
+        Arg::Uint(self)
+    }
+}
+impl ToArg for isize {
+    fn to_arg(self) -> Arg {
+        Arg::Int(self)
+    }
+}
+impl ToArg for bool {
+    fn to_arg(self) -> Arg {
+        Arg::Bool(self)
+    }
+}
+impl ToArg for String {
+    fn to_arg(self) -> Arg {
+        Arg::String(self)
+    }
+}
+impl ToArg for f64 {
+    fn to_arg(self) -> Arg {
+        Arg::Float(self)
+    }
+}
+
+impl ToArg for Vec<usize> {
+    fn to_arg(self) -> Arg {
+        Arg::Set(self.into_iter().map(|x| x.to_arg()).collect())
+    }
+}
+impl ToArg for Vec<isize> {
+    fn to_arg(self) -> Arg {
+        Arg::Set(self.into_iter().map(|x| x.to_arg()).collect())
+    }
+}
+impl ToArg for Vec<bool> {
+    fn to_arg(self) -> Arg {
+        Arg::Set(self.into_iter().map(|x| x.to_arg()).collect())
+    }
+}
+impl ToArg for Vec<String> {
+    fn to_arg(self) -> Arg {
+        Arg::Set(self.into_iter().map(|x| x.to_arg()).collect())
+    }
+}
+impl ToArg for Vec<f64> {
+    fn to_arg(self) -> Arg {
+        Arg::Set(self.into_iter().map(|x| x.to_arg()).collect())
+    }
+}
 enum Arg {
     Uint(usize),
     Int(isize),
@@ -45,6 +112,8 @@ impl Clone for Arg {
     }
 }
 
+// ---------------- MYSQL -------------------------------
+
 struct MYSQLBuilder<'a> {
     from: Option<Col>,
     select: Option<Select>,
@@ -54,6 +123,33 @@ struct MYSQLBuilder<'a> {
 }
 
 // TODO impl QueryBuilder
+impl QueryBuilder for MYSQLBuilder<'_> {
+    fn query() -> Self {
+        MYSQLBuilder {
+            from: None,
+            select: None,
+            joins: vec![],
+            r#where: vec![],
+            order: None,
+        }
+    }
+    fn from(mut self, col: Col) -> Self {
+        self.from = Some(col);
+        self
+    }
+    fn select(mut self, cols: Vec<Col>) -> Self {
+        if let Some(mut select) = self.select {
+            select.cols.extend(cols);
+            self.select = Some(select)
+        } else {
+            self.select = Some(Select { cols: cols })
+        }
+        self
+    }
+    fn to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>> {
+        self.try_to_sql()
+    }
+}
 
 impl MYSQLBuilder<'_> {
     fn new() -> Self {
@@ -65,7 +161,7 @@ impl MYSQLBuilder<'_> {
             order: None,
         }
     }
-    
+
     fn try_to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>> {
         let (mut query, mut args) = self.unpack_element(&self.select);
         let (from_query, from_args) = self.unpack_element(&self.from);
@@ -113,11 +209,8 @@ impl MYSQLBuilder<'_> {
     }
 }
 
-trait ToSQL {
-    fn to_sql(&self) -> (String, Option<Vec<Arg>>);
-}
+// ---------------- Clauses [Select, Join, Where, Order, Group] -------------------------------
 
-// TODO
 struct Select {
     cols: Vec<Col>,
 }
@@ -137,6 +230,7 @@ impl ToSQL for Select {
         (query, Some(args))
     }
 }
+
 #[derive(Clone)]
 enum Join {
     Inner,
@@ -238,6 +332,8 @@ impl ToSQL for OrderClause<'_> {
     }
 }
 
+// ----------------Table / Columns -------------------------------
+
 struct Table {
     name: String,
 }
@@ -297,6 +393,7 @@ impl ToSQL for Col {
 }
 
 // ---------------- EXPRESSIONS -------------------------------
+
 enum Op {
     Eq,
     Neq,
