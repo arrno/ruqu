@@ -183,7 +183,10 @@ impl MYSQLBuilder<'_> {
         Ok((query, args))
     }
 
-    fn unpack_element<T: ToSQL>(&self, element: &Option<T>) -> (String, Vec<Arg>) {
+    fn unpack_element<T>(&self, element: &Option<T>) -> (String, Vec<Arg>)
+    where
+        T: ToSQL,
+    {
         match &element {
             Some(value) => {
                 let (q, a) = value.to_sql();
@@ -195,7 +198,10 @@ impl MYSQLBuilder<'_> {
             None => (String::from(""), vec![]),
         }
     }
-    fn unpack_element_ref<T: ToSQL>(&self, element: &Option<&T>) -> (String, Vec<Arg>) {
+    fn unpack_element_ref<T>(&self, element: &Option<&T>) -> (String, Vec<Arg>)
+    where
+        T: ToSQL,
+    {
         match &element {
             Some(value) => {
                 let (q, a) = value.to_sql();
