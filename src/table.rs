@@ -31,6 +31,12 @@ pub struct Col {
 }
 
 impl<'a> Col {
+    pub fn new(table: String, col: String) -> Self {
+        Col{
+            table_name: table,
+            column: col
+        }
+    }
     pub fn name(&self) -> &str {
         &self.column
     }

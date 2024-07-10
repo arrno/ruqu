@@ -15,21 +15,12 @@ fn main() {
     let (query, args) = MYSQLBuilder::query()
         .from(String::from("Table"))
         .select(vec![
-            Col {
-                table_name: String::from("Table"),
-                column: String::from("Column"),
-            },
-            Col {
-                table_name: String::from("Table"),
-                column: String::from("Column"),
-            },
+            Col::new(String::from("Table"), String::from("Column")),
+            Col::new(String::from("Table"), String::from("Column")),
         ])
         .r#where(
-            Col {
-                table_name: String::from("Table"),
-                column: String::from("Column"),
-            }
-            .eq(A(Bool(true))),
+            Col::new(String::from("Table"), String::from("Column"))
+                .eq(A(Bool(true))),
         )
         .to_sql()
         .unwrap();
