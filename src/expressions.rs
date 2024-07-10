@@ -26,12 +26,12 @@ impl ToSQL for Op {
     }
 }
 
-pub enum ExpU<'a> {
-    Exp(Exp<'a>),
-    And(And<'a>),
-    Or(Or<'a>),
+pub enum ExpU {
+    Exp(Exp),
+    And(And),
+    Or(Or),
 }
-impl ToSQL for ExpU<'_> {
+impl ToSQL for ExpU {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         match self {
             ExpU::Exp(e) => e.to_sql(),
@@ -40,11 +40,11 @@ impl ToSQL for ExpU<'_> {
         }
     }
 }
-pub struct And<'a> {
-    left: Box<ExpU<'a>>,
-    right: Box<ExpU<'a>>,
+pub struct And {
+    left: Box<ExpU>,
+    right: Box<ExpU>,
 }
-impl ToSQL for And<'_> {
+impl ToSQL for And {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let mut args = vec![];
         let (left_exp, left_args) = self.left.to_sql();
@@ -58,11 +58,11 @@ impl ToSQL for And<'_> {
         (format!("({left_exp} AND {right_exp})"), Some(args))
     }
 }
-struct Or<'a> {
-    left: Box<ExpU<'a>>,
-    right: Box<ExpU<'a>>,
+struct Or {
+    left: Box<ExpU>,
+    right: Box<ExpU>,
 }
-impl ToSQL for Or<'_> {
+impl ToSQL for Or {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let mut args = vec![];
         let (left_exp, left_args) = self.left.to_sql();
@@ -77,13 +77,19 @@ impl ToSQL for Or<'_> {
     }
 }
 
-pub enum ExpTar<'a> {
+pub enum ExpTar {
     A(Arg),
     C(Col),
-    T(MYSQLBuilder<'a>),
+    T(MYSQLBuilder),
 }
 
-impl ToSQL for ExpTar<'_> {
+impl<T: ToArg> From<T> for ExpTar {
+    fn from(val: T) -> Self {
+        ExpTar::A(val.to_arg())
+    }
+}
+
+impl ToSQL for ExpTar {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         match self {
             ExpTar::A(Arg::Null) => (String::from("NULL"), None),
@@ -106,13 +112,13 @@ impl ToSQL for ExpTar<'_> {
         }
     }
 }
-pub struct Exp<'a> {
+pub struct Exp {
     pub op: Op,
-    pub left: ExpTar<'a>,
-    pub right: ExpTar<'a>,
+    pub left: ExpTar,
+    pub right: ExpTar,
 }
 
-impl ToSQL for Exp<'_> {
+impl ToSQL for Exp {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let mut args = vec![];
         let (left, arg) = self.left.to_sql();

@@ -18,10 +18,7 @@ fn main() {
             Col::new(String::from("Table"), String::from("Column")),
             Col::new(String::from("Table"), String::from("Column")),
         ])
-        .r#where(
-            Col::new(String::from("Table"), String::from("Column"))
-                .eq(A(Bool(true))),
-        )
+        .r#where(Col::new(String::from("Table"), String::from("Column")).eq(true.into()))
         .to_sql()
         .unwrap();
 }

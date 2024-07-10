@@ -40,12 +40,12 @@ impl From<Join> for String {
         }
     }
 }
-pub struct JoinClause<'a> {
-    from: &'a Col,
+pub struct JoinClause {
+    from: Col,
     join: Join,
-    on: Option<On<'a>>,
+    on: Option<On>,
 }
-impl ToSQL for JoinClause<'_> {
+impl ToSQL for JoinClause {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let join_str: String = self.join.clone().into();
         let mut args = vec![];
@@ -62,21 +62,21 @@ impl ToSQL for JoinClause<'_> {
     }
 }
 
-pub struct On<'a> {
-    r#where: Where<'a>,
+pub struct On {
+    r#where: Where,
 }
-impl ToSQL for On<'_> {
+impl ToSQL for On {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let (exp_sql, exp_args) = self.r#where.exp.to_sql();
         (format!("ON ({exp_sql})"), exp_args)
     }
 }
-pub struct Where<'a> {
-    target: &'a Col,
-    exp: ExpU<'a>,
+pub struct Where {
+    pub target: Col,
+    pub exp: ExpU,
 }
 
-impl ToSQL for Where<'_> {
+impl ToSQL for Where {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let (exp_sql, exp_args) = self.exp.to_sql();
         (format!("WHERE ({exp_sql})"), exp_args)
@@ -98,11 +98,11 @@ impl ToSQL for Order {
         }
     }
 }
-pub struct OrderClause<'a> {
-    by: Vec<&'a Col>,
+pub struct OrderClause {
+    by: Vec<Col>,
     dir: Order,
 }
-impl ToSQL for OrderClause<'_> {
+impl ToSQL for OrderClause {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let mut col_sql = Vec::new();
         let mut args = Vec::new();

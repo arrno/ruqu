@@ -1,4 +1,5 @@
 use crate::args::*;
+use crate::clauses::Where;
 use crate::expressions::*;
 use crate::traits::*;
 
@@ -30,29 +31,32 @@ pub struct Col {
     pub column: String,
 }
 
-impl<'a> Col {
+impl Col {
     pub fn new(table: String, col: String) -> Self {
-        Col{
+        Col {
             table_name: table,
-            column: col
+            column: col,
         }
     }
     pub fn name(&self) -> &str {
         &self.column
     }
-    pub fn eq(&'a self, comp: ExpTar<'a>) -> ExpU {
-        self.make_exp(comp, Op::Eq)
+    pub fn eq(self, comp: ExpTar) -> Where {
+        Where {
+            target: self.clone(),
+            exp: self.make_exp(comp, Op::Eq),
+        }
     }
-    pub fn neq(&'a self, comp: ExpTar<'a>) -> ExpU {
+    pub fn neq(&self, comp: ExpTar) -> ExpU {
         self.make_exp(comp, Op::Neq)
     }
-    pub fn lt(&'a self, comp: ExpTar<'a>) -> ExpU {
+    pub fn lt(&self, comp: ExpTar) -> ExpU {
         self.make_exp(comp, Op::Lt)
     }
-    pub fn gt(&'a self, comp: ExpTar<'a>) -> ExpU {
+    pub fn gt(&self, comp: ExpTar) -> ExpU {
         self.make_exp(comp, Op::Gt)
     }
-    fn make_exp(&'a self, comp: ExpTar<'a>, op: Op) -> ExpU {
+    fn make_exp(&self, comp: ExpTar, op: Op) -> ExpU {
         ExpU::Exp(Exp {
             op: op,
             left: ExpTar::C(self.clone()),

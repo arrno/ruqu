@@ -4,16 +4,16 @@ use crate::expressions::*;
 use crate::table::*;
 use crate::traits::*;
 
-pub struct MYSQLBuilder<'a> {
+pub struct MYSQLBuilder {
     from: Option<Table>,
     select: Option<Select>,
-    joins: Vec<JoinClause<'a>>,
-    r#where: Vec<Where<'a>>,
-    order: Option<OrderClause<'a>>,
+    joins: Vec<JoinClause>,
+    r#where: Vec<Where>,
+    order: Option<OrderClause>,
 }
 
 // TODO impl QueryBuilder
-impl QueryBuilder for MYSQLBuilder<'_> {
+impl QueryBuilder for MYSQLBuilder {
     fn query() -> Self {
         MYSQLBuilder {
             from: None,
@@ -37,7 +37,8 @@ impl QueryBuilder for MYSQLBuilder<'_> {
         self
     }
 
-    fn r#where(self, exp: ExpU) -> Self {
+    fn r#where(mut self, r#where: Where) -> Self {
+        self.r#where.push(r#where);
         self
     }
     // fn r#where<T>(mut self, col: Col, op: Op, val: Val<T>) -> Self
@@ -61,7 +62,7 @@ impl QueryBuilder for MYSQLBuilder<'_> {
     }
 }
 
-impl MYSQLBuilder<'_> {
+impl MYSQLBuilder {
     pub fn new() -> Self {
         MYSQLBuilder {
             select: None,
