@@ -30,16 +30,19 @@ fn main() {
             Col::new(String::from("Table"), String::from("Column")),
         ])
         .r#where(
-            Col::new(String::from("Table"), String::from("Column")).eq(Col::new(
-                String::from("Other"),
-                String::from("Val"),
-            )
-            .into()),
+            Col::new(String::from("Table"), String::from("Column"))
+                .eq(Col::new(String::from("Other"), String::from("Val"))),
         )
         .r#where(ExpU::exp_or(
-            Col::new(String::from("Table"), String::from("Column")).eq(true.into()),
-            Col::new(String::from("MoreTable"), String::from("SHWEET")).gt((7 as isize).into()),
+            Col::new(String::from("Table"), String::from("Column")).eq(true),
+            Col::new(String::from("MoreTable"), String::from("SHWEET")).gt((7 as isize)),
         ))
+        .r#where(ExpU::Vec(vec![
+            Col::new(String::from("Table"), String::from("Column")).eq(true),
+            Col::new(String::from("MoreTable"), String::from("SHWEET")).gt((7 as isize)),
+            Col::new(String::from("Table"), String::from("Column"))
+                .eq(Col::new(String::from("Other"), String::from("Val"))),
+        ]))
         .to_sql()
         .unwrap();
 

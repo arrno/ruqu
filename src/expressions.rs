@@ -29,6 +29,7 @@ impl ToSQL for Op {
 pub enum ExpU {
     Exp(Exp),
     And(And),
+    Vec(Vec<ExpU>),
     Or(Or),
 }
 impl ToSQL for ExpU {
@@ -37,6 +38,18 @@ impl ToSQL for ExpU {
             ExpU::Exp(e) => e.to_sql(),
             ExpU::And(a) => a.to_sql(),
             ExpU::Or(o) => o.to_sql(),
+            ExpU::Vec(v) => {
+                let mut sql = vec![];
+                let mut args = vec![];
+                v.iter().for_each(|e| {
+                    let (s, a) = e.to_sql();
+                    sql.push(s);
+                    if let Some(v) = a {
+                        args.extend(v);
+                    }
+                });
+                (format!("({})", sql.join(" AND ")), Some(args))
+            }
         }
     }
 }
@@ -109,7 +122,9 @@ pub enum ExpTar {
     C(Col),
     T(MYSQLBuilder),
 }
-
+pub trait ToExpTar {
+    fn to_exp_tar(self) -> ExpTar;
+}
 impl<T: ToArg> From<T> for ExpTar {
     fn from(val: T) -> Self {
         ExpTar::A(val.to_arg())
@@ -118,6 +133,16 @@ impl<T: ToArg> From<T> for ExpTar {
 impl From<Col> for ExpTar {
     fn from(col: Col) -> Self {
         ExpTar::C(col)
+    }
+}
+impl<T: ToArg> ToExpTar for T {
+    fn to_exp_tar(self) -> ExpTar {
+        ExpTar::A(self.to_arg())
+    }
+}
+impl ToExpTar for Col {
+    fn to_exp_tar(self) -> ExpTar {
+        ExpTar::C(self)
     }
 }
 

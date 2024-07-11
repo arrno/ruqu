@@ -41,17 +41,17 @@ impl Col {
     pub fn name(&self) -> &str {
         &self.column
     }
-    pub fn eq(self, comp: ExpTar) -> ExpU {
-        self.make_exp(comp, Op::Eq)
+    pub fn eq<T: ToExpTar>(self, exp: T) -> ExpU {
+        self.make_exp(exp.to_exp_tar(), Op::Eq)
     }
-    pub fn neq(&self, comp: ExpTar) -> ExpU {
-        self.make_exp(comp, Op::Neq)
+    pub fn neq<T: ToExpTar>(&self, exp: T) -> ExpU {
+        self.make_exp(exp.to_exp_tar(), Op::Neq)
     }
-    pub fn lt(&self, comp: ExpTar) -> ExpU {
-        self.make_exp(comp, Op::Lt)
+    pub fn lt<T: ToExpTar>(&self, exp: T) -> ExpU {
+        self.make_exp(exp.to_exp_tar(), Op::Lt)
     }
-    pub fn gt(&self, comp: ExpTar) -> ExpU {
-        self.make_exp(comp, Op::Gt)
+    pub fn gt<T: ToExpTar>(&self, exp: T) -> ExpU {
+        self.make_exp(exp.to_exp_tar(), Op::Gt)
     }
     fn make_exp(&self, comp: ExpTar, op: Op) -> ExpU {
         ExpU::Exp(Exp {
