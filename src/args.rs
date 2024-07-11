@@ -61,6 +61,7 @@ impl ToArg for Vec<f64> {
         Arg::Set(self.into_iter().map(|x| x.to_arg()).collect())
     }
 }
+#[derive(Debug)]
 pub enum Arg {
     Uint(usize),
     Int(isize),

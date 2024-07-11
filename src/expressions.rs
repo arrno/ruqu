@@ -40,6 +40,33 @@ impl ToSQL for ExpU {
         }
     }
 }
+impl ExpU {
+    pub fn exp_and(left: ExpU, right: ExpU) -> Self {
+        ExpU::And(And {
+            left: Box::new(left),
+            right: Box::new(right),
+        })
+    }
+    pub fn exp_or(left: ExpU, right: ExpU) -> Self {
+        ExpU::Or(Or {
+            left: Box::new(left),
+            right: Box::new(right),
+        })
+    }
+    pub fn and(self, exp: ExpU) -> Self {
+        ExpU::And(And {
+            left: Box::new(self),
+            right: Box::new(exp),
+        })
+    }
+    pub fn or(self, exp: ExpU) -> Self {
+        ExpU::Or(Or {
+            left: Box::new(self),
+            right: Box::new(exp),
+        })
+    }
+}
+
 pub struct And {
     left: Box<ExpU>,
     right: Box<ExpU>,
@@ -58,7 +85,7 @@ impl ToSQL for And {
         (format!("({left_exp} AND {right_exp})"), Some(args))
     }
 }
-struct Or {
+pub struct Or {
     left: Box<ExpU>,
     right: Box<ExpU>,
 }
@@ -86,6 +113,11 @@ pub enum ExpTar {
 impl<T: ToArg> From<T> for ExpTar {
     fn from(val: T) -> Self {
         ExpTar::A(val.to_arg())
+    }
+}
+impl From<Col> for ExpTar {
+    fn from(col: Col) -> Self {
+        ExpTar::C(col)
     }
 }
 

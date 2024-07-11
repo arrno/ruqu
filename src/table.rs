@@ -41,11 +41,8 @@ impl Col {
     pub fn name(&self) -> &str {
         &self.column
     }
-    pub fn eq(self, comp: ExpTar) -> Where {
-        Where {
-            target: self.clone(),
-            exp: self.make_exp(comp, Op::Eq),
-        }
+    pub fn eq(self, comp: ExpTar) -> ExpU {
+        self.make_exp(comp, Op::Eq)
     }
     pub fn neq(&self, comp: ExpTar) -> ExpU {
         self.make_exp(comp, Op::Neq)

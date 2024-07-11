@@ -8,7 +8,7 @@ pub struct MYSQLBuilder {
     from: Option<Table>,
     select: Option<Select>,
     joins: Vec<JoinClause>,
-    r#where: Vec<Where>,
+    r#where: Option<Where>,
     order: Option<OrderClause>,
 }
 
@@ -19,7 +19,7 @@ impl QueryBuilder for MYSQLBuilder {
             from: None,
             select: None,
             joins: vec![],
-            r#where: vec![],
+            r#where: None,
             order: None,
         }
     }
@@ -37,8 +37,15 @@ impl QueryBuilder for MYSQLBuilder {
         self
     }
 
-    fn r#where(mut self, r#where: Where) -> Self {
-        self.r#where.push(r#where);
+    fn r#where(mut self, exp: ExpU) -> Self {
+        match self.r#where {
+            Some(where_clause) => {
+                self.r#where = Some(Where {
+                    exp: Box::new(where_clause.exp.and(exp)),
+                })
+            }
+            None => self.r#where = Some(Where { exp: Box::new(exp) }),
+        };
         self
     }
     // fn r#where<T>(mut self, col: Col, op: Op, val: Val<T>) -> Self
@@ -68,7 +75,7 @@ impl MYSQLBuilder {
             select: None,
             from: None,
             joins: vec![],
-            r#where: vec![],
+            r#where: None,
             order: None,
         }
     }
@@ -76,7 +83,7 @@ impl MYSQLBuilder {
     pub fn try_to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>> {
         let (mut query, mut args) = self.unpack_element(&self.select);
         let (from_query, from_args) = self.unpack_element(&self.from);
-        query.push_str(format!("\n{from_query}").as_str());
+        query.push_str(format!("\nFROM {from_query}").as_str());
         args.extend(from_args);
         for join in &self.joins {
             let (join_query, join_args) = self.unpack_element_ref(&Some(join));

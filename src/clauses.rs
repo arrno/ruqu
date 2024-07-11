@@ -72,14 +72,13 @@ impl ToSQL for On {
     }
 }
 pub struct Where {
-    pub target: Col,
-    pub exp: ExpU,
+    pub exp: Box<ExpU>,
 }
 
 impl ToSQL for Where {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let (exp_sql, exp_args) = self.exp.to_sql();
-        (format!("WHERE ({exp_sql})"), exp_args)
+        (format!("WHERE {exp_sql}"), exp_args)
     }
 }
 
