@@ -23,8 +23,10 @@ impl QueryBuilder for MYSQLBuilder {
             order: None,
         }
     }
-    fn from(mut self, table_name: String) -> Self {
-        self.from = Some(Table { name: table_name });
+    fn from(mut self, table_name: &'static str) -> Self {
+        self.from = Some(Table {
+            name: table_name.to_string(),
+        });
         self
     }
     fn select(mut self, cols: Vec<Col>) -> Self {
@@ -37,7 +39,7 @@ impl QueryBuilder for MYSQLBuilder {
         self
     }
 
-    fn r#where(mut self, exp: ExpU) -> Self {
+    fn r#where(mut self, exp: Exp) -> Self {
         match self.r#where {
             Some(where_clause) => {
                 self.r#where = Some(Where {
@@ -48,22 +50,7 @@ impl QueryBuilder for MYSQLBuilder {
         };
         self
     }
-    // fn r#where<T>(mut self, col: Col, op: Op, val: Val<T>) -> Self
-    // where
-    //     T: ToArg,
-    // {
-    //     self.r#where.push(Where{
-    //         target: col,
-    //         exp: ExpU::Exp(Exp{
-    //             op: op,
-    //             left: ExpTar::Col(col),
-    //             right: match val {
 
-    //             }
-    //         }),
-    //     });
-    //     self
-    // }
     fn to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>> {
         self.try_to_sql()
     }

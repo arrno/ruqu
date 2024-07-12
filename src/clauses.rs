@@ -72,7 +72,7 @@ impl ToSQL for On {
     }
 }
 pub struct Where {
-    pub exp: Box<ExpU>,
+    pub exp: Box<Exp>,
 }
 
 impl ToSQL for Where {

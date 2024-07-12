@@ -5,10 +5,9 @@ mod mysql;
 mod table;
 mod traits;
 
-use args::Arg::*;
-use expressions::{ExpTar::A, ExpU, Or};
+use expressions::*;
 use mysql::*;
-use table::Col;
+use table::*;
 use traits::*;
 
 fn main() {
@@ -24,24 +23,20 @@ fn main() {
     //     .unwrap();
 
     let (query, args) = MYSQLBuilder::query()
-        .from(String::from("Table"))
+        .from("Table")
         .select(vec![
-            Col::new(String::from("Table"), String::from("Column")),
-            Col::new(String::from("Table"), String::from("Column")),
+            Col::new("Table", "Column"),
+            Col::new("Table", "Column"),
         ])
-        .r#where(
-            Col::new(String::from("Table"), String::from("Column"))
-                .eq(Col::new(String::from("Other"), String::from("Val"))),
-        )
-        .r#where(ExpU::exp_or(
-            Col::new(String::from("Table"), String::from("Column")).eq(true),
-            Col::new(String::from("MoreTable"), String::from("SHWEET")).gt((7 as isize)),
+        .r#where(Col::new("Table", "Column").eq(Col::new("Other", "Val")))
+        .r#where(Exp::exp_or(
+            Col::new("Table", "Column").eq(true),
+            Col::new("More Table", "SHWEET").gt(7),
         ))
-        .r#where(ExpU::Vec(vec![
-            Col::new(String::from("Table"), String::from("Column")).eq(true),
-            Col::new(String::from("MoreTable"), String::from("SHWEET")).gt((7 as isize)),
-            Col::new(String::from("Table"), String::from("Column"))
-                .eq(Col::new(String::from("Other"), String::from("Val"))),
+        .r#where(Exp::Set(vec![
+            Col::new("Table", "Column").eq(true),
+            Col::new("More Table", "SHWEET").gt(7),
+            Col::new("Table", "Column").eq(Col::new("Other", "Val")),
         ]))
         .to_sql()
         .unwrap();

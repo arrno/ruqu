@@ -20,6 +20,26 @@ impl ToArg for isize {
         Arg::Int(self)
     }
 }
+impl ToArg for u32 {
+    fn to_arg(self) -> Arg {
+        Arg::Uint(self as usize)
+    }
+}
+impl ToArg for i32 {
+    fn to_arg(self) -> Arg {
+        Arg::Int(self as isize)
+    }
+}
+impl ToArg for u64 {
+    fn to_arg(self) -> Arg {
+        Arg::Uint(self as usize)
+    }
+}
+impl ToArg for i64 {
+    fn to_arg(self) -> Arg {
+        Arg::Int(self as isize)
+    }
+}
 impl ToArg for bool {
     fn to_arg(self) -> Arg {
         Arg::Bool(self)

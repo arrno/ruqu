@@ -26,19 +26,19 @@ impl ToSQL for Op {
     }
 }
 
-pub enum ExpU {
-    Exp(Exp),
+pub enum Exp {
+    Exp(ExpU),
     And(And),
-    Vec(Vec<ExpU>),
+    Set(Vec<Exp>),
     Or(Or),
 }
-impl ToSQL for ExpU {
+impl ToSQL for Exp {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         match self {
-            ExpU::Exp(e) => e.to_sql(),
-            ExpU::And(a) => a.to_sql(),
-            ExpU::Or(o) => o.to_sql(),
-            ExpU::Vec(v) => {
+            Exp::Exp(e) => e.to_sql(),
+            Exp::And(a) => a.to_sql(),
+            Exp::Or(o) => o.to_sql(),
+            Exp::Set(v) => {
                 let mut sql = vec![];
                 let mut args = vec![];
                 v.iter().for_each(|e| {
@@ -53,27 +53,27 @@ impl ToSQL for ExpU {
         }
     }
 }
-impl ExpU {
-    pub fn exp_and(left: ExpU, right: ExpU) -> Self {
-        ExpU::And(And {
+impl Exp {
+    pub fn exp_and(left: Exp, right: Exp) -> Self {
+        Exp::And(And {
             left: Box::new(left),
             right: Box::new(right),
         })
     }
-    pub fn exp_or(left: ExpU, right: ExpU) -> Self {
-        ExpU::Or(Or {
+    pub fn exp_or(left: Exp, right: Exp) -> Self {
+        Exp::Or(Or {
             left: Box::new(left),
             right: Box::new(right),
         })
     }
-    pub fn and(self, exp: ExpU) -> Self {
-        ExpU::And(And {
+    pub fn and(self, exp: Exp) -> Self {
+        Exp::And(And {
             left: Box::new(self),
             right: Box::new(exp),
         })
     }
-    pub fn or(self, exp: ExpU) -> Self {
-        ExpU::Or(Or {
+    pub fn or(self, exp: Exp) -> Self {
+        Exp::Or(Or {
             left: Box::new(self),
             right: Box::new(exp),
         })
@@ -81,8 +81,8 @@ impl ExpU {
 }
 
 pub struct And {
-    left: Box<ExpU>,
-    right: Box<ExpU>,
+    left: Box<Exp>,
+    right: Box<Exp>,
 }
 impl ToSQL for And {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
@@ -99,8 +99,8 @@ impl ToSQL for And {
     }
 }
 pub struct Or {
-    left: Box<ExpU>,
-    right: Box<ExpU>,
+    left: Box<Exp>,
+    right: Box<Exp>,
 }
 impl ToSQL for Or {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
@@ -120,6 +120,7 @@ impl ToSQL for Or {
 pub enum ExpTar {
     A(Arg),
     C(Col),
+    Null,
     T(MYSQLBuilder),
 }
 pub trait ToExpTar {
@@ -149,7 +150,7 @@ impl ToExpTar for Col {
 impl ToSQL for ExpTar {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         match self {
-            ExpTar::A(Arg::Null) => (String::from("NULL"), None),
+            ExpTar::Null => (String::from("NULL"), None),
             ExpTar::A(Arg::Set(arg_set)) => {
                 let arg_string: Vec<String> = (0..arg_set.len())
                     .into_iter()
@@ -169,13 +170,13 @@ impl ToSQL for ExpTar {
         }
     }
 }
-pub struct Exp {
+pub struct ExpU {
     pub op: Op,
     pub left: ExpTar,
     pub right: ExpTar,
 }
 
-impl ToSQL for Exp {
+impl ToSQL for ExpU {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let mut args = vec![];
         let (left, arg) = self.left.to_sql();
