@@ -1,6 +1,6 @@
 use crate::args::*;
-use crate::statements::{Order, Dir};
 use crate::expressions::*;
+use crate::statements::{Dir, Order};
 use crate::traits::*;
 
 pub struct Table {

@@ -1,6 +1,6 @@
 use crate::args::*;
-use crate::statements::*;
 use crate::expressions::*;
+use crate::statements::*;
 use crate::table::*;
 use crate::traits::*;
 
@@ -49,6 +49,18 @@ impl QueryBuilder for MYSQLBuilder {
             None => self.r#where = Some(Where { exp: Box::new(exp) }),
         };
         self
+    }
+
+    fn join(self, col: Col, on: Exp) -> Self {
+        self.do_join(col, on, JoinType::Inner)
+    }
+
+    fn left_join(self, col: Col, on: Exp) -> Self {
+        self.do_join(col, on, JoinType::Inner)
+    }
+
+    fn right_join(self, col: Col, on: Exp) -> Self {
+        self.do_join(col, on, JoinType::Inner)
     }
 
     fn order(mut self, order: Order) -> Self {
@@ -129,5 +141,14 @@ impl MYSQLBuilder {
             }
             None => (String::from(""), vec![]),
         }
+    }
+
+    fn do_join(mut self, col: Col, on: Exp, join: JoinType) -> Self {
+        self.joins.push(Join {
+            from: col,
+            join: join,
+            on: Some(On::new(Where::new(on))),
+        });
+        self
     }
 }

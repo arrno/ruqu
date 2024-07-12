@@ -1,7 +1,7 @@
 mod args;
-mod statements;
 mod expressions;
 mod mysql;
+mod statements;
 mod table;
 mod traits;
 

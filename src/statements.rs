@@ -24,7 +24,7 @@ impl ToSQL for Select {
 }
 
 #[derive(Clone)]
-enum JoinType {
+pub enum JoinType {
     Inner,
     Left,
     Right,
@@ -41,9 +41,9 @@ impl From<JoinType> for String {
     }
 }
 pub struct Join {
-    from: Col,
-    join: JoinType,
-    on: Option<On>,
+    pub from: Col,
+    pub join: JoinType,
+    pub on: Option<On>,
 }
 impl ToSQL for Join {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
@@ -56,7 +56,7 @@ impl ToSQL for Join {
             if let Some(exp_args) = exp_args_op {
                 args.extend(exp_args)
             }
-            sql.push_str(format!(" ON ({exp_sql})").as_str());
+            sql.push_str(format!("\n\tON ({exp_sql})").as_str());
         };
         (sql, Some(args))
     }
@@ -64,6 +64,11 @@ impl ToSQL for Join {
 
 pub struct On {
     r#where: Where,
+}
+impl On {
+    pub fn new(r#where: Where) -> Self {
+        On { r#where }
+    }
 }
 impl ToSQL for On {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
@@ -74,7 +79,11 @@ impl ToSQL for On {
 pub struct Where {
     pub exp: Box<Exp>,
 }
-
+impl Where {
+    pub fn new(exp: Exp) -> Self {
+        Where { exp: Box::new(exp) }
+    }
+}
 impl ToSQL for Where {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let (exp_sql, exp_args) = self.exp.to_sql();
@@ -103,10 +112,7 @@ pub struct Order {
 }
 impl Order {
     pub fn new(by: Col, dir: Dir) -> Self {
-        Order {
-            by,
-            dir,
-        }
+        Order { by, dir }
     }
 }
 impl ToSQL for Order {
