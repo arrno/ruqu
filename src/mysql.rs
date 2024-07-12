@@ -7,7 +7,7 @@ use crate::traits::*;
 pub struct MYSQLBuilder {
     from: Option<Table>,
     select: Option<Select>,
-    joins: Vec<JoinClause>,
+    joins: Vec<Join>,
     r#where: Option<Where>,
     order: Vec<Order>,
 }

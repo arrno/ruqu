@@ -24,28 +24,28 @@ impl ToSQL for Select {
 }
 
 #[derive(Clone)]
-enum Join {
+enum JoinType {
     Inner,
     Left,
     Right,
     Union,
 }
-impl From<Join> for String {
-    fn from(join: Join) -> Self {
+impl From<JoinType> for String {
+    fn from(join: JoinType) -> Self {
         match join {
-            Join::Inner => String::from("JOIN"),
-            Join::Left => String::from("LEFT JOIN"),
-            Join::Right => String::from("RIGHT JOIN"),
+            JoinType::Inner => String::from("JOIN"),
+            JoinType::Left => String::from("LEFT JOIN"),
+            JoinType::Right => String::from("RIGHT JOIN"),
             _ => String::from("JOIN"),
         }
     }
 }
-pub struct JoinClause {
+pub struct Join {
     from: Col,
-    join: Join,
+    join: JoinType,
     on: Option<On>,
 }
-impl ToSQL for JoinClause {
+impl ToSQL for Join {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let join_str: String = self.join.clone().into();
         let mut args = vec![];
