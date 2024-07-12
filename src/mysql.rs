@@ -1,5 +1,5 @@
 use crate::args::*;
-use crate::clauses::*;
+use crate::statements::*;
 use crate::expressions::*;
 use crate::table::*;
 use crate::traits::*;
@@ -9,7 +9,7 @@ pub struct MYSQLBuilder {
     select: Option<Select>,
     joins: Vec<JoinClause>,
     r#where: Option<Where>,
-    order: Option<OrderClause>,
+    order: Vec<Order>,
 }
 
 // TODO impl QueryBuilder
@@ -20,7 +20,7 @@ impl QueryBuilder for MYSQLBuilder {
             select: None,
             joins: vec![],
             r#where: None,
-            order: None,
+            order: vec![],
         }
     }
     fn from(mut self, table_name: &'static str) -> Self {
@@ -51,6 +51,11 @@ impl QueryBuilder for MYSQLBuilder {
         self
     }
 
+    fn order(mut self, order: Order) -> Self {
+        self.order.push(order);
+        self
+    }
+
     fn to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>> {
         self.try_to_sql()
     }
@@ -63,7 +68,7 @@ impl MYSQLBuilder {
             from: None,
             joins: vec![],
             r#where: None,
-            order: None,
+            order: vec![],
         }
     }
 
@@ -82,9 +87,16 @@ impl MYSQLBuilder {
             query.push_str(format!("\n{where_query}").as_str());
             args.extend(where_args);
         }
-        let (order_query, order_args) = self.unpack_element(&self.order);
-        query.push_str(format!("\n{order_query}").as_str());
-        args.extend(order_args);
+        let mut order_query_strings = vec![];
+        for order in &self.order {
+            let (or_query, order_args) = self.unpack_element_ref(&Some(order));
+            order_query_strings.push(or_query);
+            args.extend(order_args);
+        }
+        if order_query_strings.len() > 0 {
+            let order_query = format!("\nORDER BY {}", order_query_strings.join(", "));
+            query.push_str(order_query.as_str());
+        }
         Ok((query, args))
     }
 

@@ -1,5 +1,5 @@
 mod args;
-mod clauses;
+mod statements;
 mod expressions;
 mod mysql;
 mod table;

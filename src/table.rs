@@ -1,5 +1,5 @@
 use crate::args::*;
-use crate::clauses::Where;
+use crate::statements::{Order, Dir};
 use crate::expressions::*;
 use crate::traits::*;
 
@@ -75,6 +75,12 @@ impl Col {
             left: ExpTar::C(self.clone()),
             right: comp,
         })
+    }
+    pub fn asc(&self) -> Order {
+        Order::new(self.clone(), Dir::Asc)
+    }
+    pub fn desc(&self) -> Order {
+        Order::new(self.clone(), Dir::Desc)
     }
 }
 

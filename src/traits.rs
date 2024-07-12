@@ -1,5 +1,5 @@
 use crate::args::*;
-use crate::clauses::*;
+use crate::statements::*;
 use crate::expressions::*;
 use crate::table::*;
 
@@ -11,7 +11,7 @@ pub trait QueryBuilder {
     // fn left_join(self) -> Self;
     // fn right_join(self) -> Self;
     fn r#where(self, exp: Exp) -> Self;
-    // fn order(self) -> Self;
+    fn order(self, order: Order) -> Self;
     fn to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>>;
 }
 

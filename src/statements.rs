@@ -85,40 +85,33 @@ impl ToSQL for Where {
 // TODO
 // struct GroupBy {}
 
-enum Order {
+pub enum Dir {
     Asc,
     Desc,
 }
-impl ToSQL for Order {
+impl ToSQL for Dir {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         match self {
-            Order::Asc => (String::from("ASC"), None),
-            Order::Desc => (String::from("DESC"), None),
+            Dir::Asc => (String::from("ASC"), None),
+            Dir::Desc => (String::from("DESC"), None),
         }
     }
 }
-pub struct OrderClause {
-    by: Vec<Col>,
-    dir: Order,
+pub struct Order {
+    by: Col,
+    dir: Dir,
 }
-impl ToSQL for OrderClause {
+impl Order {
+    pub fn new(by: Col, dir: Dir) -> Self {
+        Order {
+            by,
+            dir,
+        }
+    }
+}
+impl ToSQL for Order {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
-        let mut col_sql = Vec::new();
-        let mut args = Vec::new();
-        self.by.iter().for_each(|col| {
-            let (csql, cargs) = col.to_sql();
-            col_sql.push(csql);
-            if let Some(v) = cargs {
-                args.extend(v);
-            }
-        });
-        (
-            format!(
-                "ORDER BY {} {}",
-                col_sql.join(" ").as_str(),
-                self.dir.to_sql().0
-            ),
-            Some(args),
-        )
+        let (col_sql, col_args) = self.by.to_sql();
+        (format!("{} {}", col_sql, self.dir.to_sql().0), col_args)
     }
 }
