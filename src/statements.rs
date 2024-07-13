@@ -178,6 +178,7 @@ impl ToSQL for Where {
     }
 }
 
+#[derive(Clone)]
 pub enum Dir {
     Asc,
     Desc,
@@ -191,6 +192,8 @@ impl ToSQL for Dir {
         }
     }
 }
+
+#[derive(Clone)]
 pub struct Order {
     by: Col,
     dir: Dir,

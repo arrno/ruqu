@@ -10,6 +10,7 @@ pub enum Op {
     Gt,
     In,
     Is,
+    Like,
     IsNot,
 }
 
@@ -23,6 +24,7 @@ impl ToSQL for Op {
             Op::In => (String::from("IN"), None),
             Op::Is => (String::from("IS"), None),
             Op::IsNot => (String::from("IS NOT"), None),
+            Op::Like => (String::from("LIKE"), None),
         }
     }
 }

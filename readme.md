@@ -48,8 +48,7 @@ TODO
 - ColumnFunctions: 
     - Count(Distinct)
     - Sum, Max, Min, Avg
-    - Group_concat(Distinct, Order)
-    - Like
+    - GroupConcat(Distinct, Order)
     - Instr
-    - coalesce
+    - Coalesce
 - Update, Insert, Delete
