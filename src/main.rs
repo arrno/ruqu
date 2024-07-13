@@ -14,10 +14,7 @@ use traits::*;
 fn main() {
     let (query, args) = MYSQLBuilder::query()
         .from("Table")
-        .select(vec![
-            Cl("Table", "Column"),
-            Cl("Table", "Column"),
-        ])
+        .select(vec![Cl("Table", "Column"), Cl("Table", "Column")])
         .join(
             Cl("Second", "Blue"),
             On::new(Exp::exp_and(
