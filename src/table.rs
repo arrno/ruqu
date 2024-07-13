@@ -50,7 +50,7 @@ impl Wrapper {
         match self {
             Wrapper::Count(Some(sub)) => match **sub {
                 Wrapper::Distinct => format!("COUNT(DISTINCT {parent_sql})"),
-                _ => format!("COUNT({parent_sql})")
+                _ => format!("COUNT({parent_sql})"),
             },
             Wrapper::Count(_) => format!("COUNT({parent_sql})"),
             Wrapper::Sum => format!("SUM({parent_sql})"),
@@ -59,12 +59,12 @@ impl Wrapper {
             Wrapper::Avg => format!("AVG({parent_sql})"),
             Wrapper::Concat(Some(sub)) => match **sub {
                 Wrapper::Distinct => format!("GROUP_CONCAT(DISTINCT {parent_sql})"),
-                _ => format!("GROUP_CONCAT({parent_sql})")
+                _ => format!("GROUP_CONCAT({parent_sql})"),
             },
             Wrapper::Concat(_) => format!("GROUP_CONCAT({parent_sql})"),
             Wrapper::Instr(sub) => format!("INSTR({parent_sql}, {sub})"),
             Wrapper::Coalesce => format!("COALESCE({parent_sql})"),
-            Wrapper::Distinct => format!("DISTINCT {parent_sql}")
+            Wrapper::Distinct => format!("DISTINCT {parent_sql}"),
         }
     }
 }
@@ -74,7 +74,7 @@ pub struct Col {
     table_name: String,
     column: String,
     alias: Option<String>,
-    wrapper: Option<Box<Wrapper>>
+    wrapper: Option<Box<Wrapper>>,
 }
 
 pub fn cl(table: &'static str, col: &'static str) -> Col {
@@ -140,7 +140,7 @@ impl ToSQL for Col {
         }
         match &self.wrapper {
             Some(wrapper) => (wrapper.to_sql(self), None),
-            None =>  (sql, None)
+            None => (sql, None),
         }
     }
 }

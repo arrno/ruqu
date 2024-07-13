@@ -15,7 +15,7 @@ pub struct MYSQLBuilder {
     group_by: Option<GroupBy>,
 }
 
-impl QueryBuilder for MYSQLBuilder{
+impl QueryBuilder for MYSQLBuilder {
     fn query() -> Self {
         MYSQLBuilder {
             from: None,
@@ -33,7 +33,7 @@ impl QueryBuilder for MYSQLBuilder{
     }
 }
 
-impl FetchQBuilder for MYSQLBuilder{
+impl FetchQBuilder for MYSQLBuilder {
     fn from(mut self, table_name: &'static str) -> Self {
         self.from = Some(Table::new(table_name.to_string()));
         self
