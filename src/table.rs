@@ -4,11 +4,11 @@ use crate::statements::{Dir, Order};
 use crate::traits::*;
 
 pub struct Table {
-    pub name: String,
+    name: String,
 }
 
 impl Table {
-    fn new(name: String) -> Self {
+    pub fn new(name: String) -> Self {
         return Table { name: name };
     }
     fn col(&self, name: String) -> Col {
@@ -28,12 +28,12 @@ impl ToSQL for Table {
 
 #[derive(Clone)]
 pub struct Col {
-    pub table_name: String,
-    pub column: String,
-    pub alias: Option<String>,
+    table_name: String,
+    column: String,
+    alias: Option<String>,
 }
 
-pub fn Cl(table: &'static str, col: &'static str) -> Col {
+pub fn cl(table: &'static str, col: &'static str) -> Col {
     Col::new(table, col)
 }
 
@@ -74,11 +74,7 @@ impl Col {
         self.make_exp(ExpTar::Null, Op::IsNot)
     }
     fn make_exp(&self, comp: ExpTar, op: Op) -> Exp {
-        Exp::Exp(ExpU {
-            op: op,
-            left: ExpTar::C(self.clone()),
-            right: comp,
-        })
+        Exp::Exp(ExpU::new(op, ExpTar::C(self.clone()), comp))
     }
     pub fn asc(&self) -> Order {
         Order::new(self.clone(), Dir::Asc)

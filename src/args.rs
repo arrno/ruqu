@@ -1,10 +1,4 @@
 use crate::table::*;
-struct ArgIn(Box<dyn erased_serde::Serialize>);
-
-pub enum Val {
-    Col(Col),
-    Arg(Arg),
-}
 
 pub trait ToArg {
     fn to_arg(self) -> Arg;

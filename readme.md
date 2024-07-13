@@ -5,22 +5,22 @@ This project is intended to replicate the features of [this project](https://dou
 ```rust
 let (query, args) = MYSQLBuilder::query()
     .from("Table")
-    .select(vec![Cl("Table", "Column"), Cl("Table", "Column")])
+    .select(vec![cl("Table", "Column"), cl("Table", "Column")])
     .join(
-        Cl("Second", "Blue"),
+        cl("Second", "Blue"),
         On::new(Exp::exp_and(
-            Cl("Table", "Column").eq(Cl("Second", "Blue")),
-            Cl("Second", "Deleted").is_null(),
+            cl("Table", "Column").eq(cl("Second", "Blue")),
+            cl("Second", "Deleted").is_null(),
         )),
     )
     .r#where(Exp::Set(vec![
         Exp::exp_or(
-            Cl("Table", "Column").eq(true),
-            Cl("More Table", "SHWEET").gt(7),
+            cl("Table", "Column").eq(true),
+            cl("More Table", "SHWEET").gt(7),
         ),
-        Cl("Table", "Column").eq(Cl("Other", "Val")),
+        cl("Table", "Column").eq(cl("Other", "Val")),
     ]))
-    .order(Cl("Second", "Blue"), Dir::Asc)
+    .order(cl("Second", "Blue"), Dir::Asc)
     .to_sql()
     .unwrap();
 ```
@@ -38,3 +38,16 @@ ORDER BY `Second`.`Blue` ASC
 -- Bool(true)
 -- Int(7)
 ```
+
+TODO
+- Limit, GroupBy, Having,
+- Select distinct
+- ColumnFunctions: 
+    - Count(Distinct)
+    - Sum, Max, Min, Avg
+    - Group_concat(Distinct, Order)
+    - Like
+    - Instr
+    - coalesce
+- Union Join
+- Update, Insert, Delete

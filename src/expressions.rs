@@ -171,9 +171,15 @@ impl ToSQL for ExpTar {
     }
 }
 pub struct ExpU {
-    pub op: Op,
-    pub left: ExpTar,
-    pub right: ExpTar,
+    op: Op,
+    left: ExpTar,
+    right: ExpTar,
+}
+
+impl ExpU {
+    pub fn new(op: Op, left: ExpTar, right: ExpTar) -> Self {
+        ExpU { op, left, right }
+    }
 }
 
 impl ToSQL for ExpU {

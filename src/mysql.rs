@@ -10,6 +10,8 @@ pub struct MYSQLBuilder {
     joins: Vec<Join>,
     r#where: Option<Where>,
     order: Vec<Order>,
+    limit: Option<Limit>,
+    group_by: Option<GroupBy>,
 }
 
 // TODO impl QueryBuilder
@@ -21,20 +23,20 @@ impl QueryBuilder for MYSQLBuilder {
             joins: vec![],
             r#where: None,
             order: vec![],
+            limit: None,
+            group_by: None,
         }
     }
     fn from(mut self, table_name: &'static str) -> Self {
-        self.from = Some(Table {
-            name: table_name.to_string(),
-        });
+        self.from = Some(Table::new(table_name.to_string()));
         self
     }
     fn select(mut self, cols: Vec<Col>) -> Self {
         if let Some(mut select) = self.select {
-            select.cols.extend(cols);
+            select.extend(cols);
             self.select = Some(select)
         } else {
-            self.select = Some(Select { cols: cols })
+            self.select = Some(Select::new(cols))
         }
         self
     }
@@ -81,6 +83,8 @@ impl MYSQLBuilder {
             joins: vec![],
             r#where: None,
             order: vec![],
+            limit: None,
+            group_by: None,
         }
     }
 
@@ -109,6 +113,12 @@ impl MYSQLBuilder {
             let order_query = format!("\nORDER BY {}", order_query_strings.join(", "));
             query.push_str(order_query.as_str());
         }
+        let (group_query, group_args) = self.unpack_element(&self.group_by);
+        query.push_str(format!("\n{group_query}").as_str());
+        args.extend(group_args);
+        let (limit_query, limit_args) = self.unpack_element(&self.limit);
+        query.push_str(format!("\n{limit_query}").as_str());
+        args.extend(limit_args);
         Ok((query, args))
     }
 
@@ -144,11 +154,7 @@ impl MYSQLBuilder {
     }
 
     fn do_join(mut self, col: Col, on: Exp, join: JoinType) -> Self {
-        self.joins.push(Join {
-            from: col,
-            join: join,
-            on: Some(On::new(on)),
-        });
+        self.joins.push(Join::new(col, join, Some(On::new(on))));
         self
     }
 }

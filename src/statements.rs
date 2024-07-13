@@ -3,12 +3,64 @@ use crate::expressions::*;
 use crate::table::*;
 use crate::traits::*;
 
+pub struct Limit(i32);
+impl ToSQL for Limit {
+    fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
+        (format!("LIMIT {}", self.0), None)
+    }
+}
+
+pub struct GroupBy {
+    cols: Vec<Col>,
+    having: Option<Box<ExpU>>,
+}
+
+impl ToSQL for GroupBy {
+    fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
+        let mut col_sql = vec![];
+        let mut col_args = vec![];
+        self.cols.iter().for_each(|col| match col.to_sql() {
+            (sql, Some(args)) => {
+                col_sql.push(sql);
+                col_args.extend(args);
+            }
+            (sql, None) => col_sql.push(sql),
+        });
+        let mut sql = format!("GROUP BY {}", col_sql.join(", "));
+        if let Some(having) = &self.having {
+            match having.to_sql() {
+                (having_sql, Some(having_args)) => {
+                    sql.push_str(format!("HAVING {having_sql}").as_str());
+                    col_args.extend(having_args);
+                }
+                (having_sql, None) => sql.push_str(format!("HAVING {having_sql}").as_str()),
+            };
+        }
+        (sql, Some(col_args))
+    }
+}
+
 pub struct Select {
-    pub cols: Vec<Col>,
+    cols: Vec<Col>,
+    distinct: bool,
+}
+impl Select {
+    pub fn new(cols: Vec<Col>) -> Self {
+        Select {
+            cols: cols,
+            distinct: false,
+        }
+    }
+    pub fn extend(&mut self, cols: Vec<Col>) {
+        self.cols.extend(cols);
+    }
 }
 impl ToSQL for Select {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let mut query = String::from("SELECT ");
+        if self.distinct {
+            query.push_str(" DISTINCT ");
+        }
         let mut selects = Vec::new();
         let mut args = Vec::new();
         self.cols.iter().for_each(|col| {
@@ -41,9 +93,14 @@ impl From<JoinType> for String {
     }
 }
 pub struct Join {
-    pub from: Col,
-    pub join: JoinType,
-    pub on: Option<On>,
+    from: Col,
+    join: JoinType,
+    on: Option<On>,
+}
+impl Join {
+    pub fn new(from: Col, join: JoinType, on: Option<On>) -> Self {
+        Join { from, join, on }
+    }
 }
 impl ToSQL for Join {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
