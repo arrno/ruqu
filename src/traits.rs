@@ -7,7 +7,7 @@ pub trait QueryBuilder {
     fn query() -> Self;
     fn from(self, table_name: &'static str) -> Self;
     fn select(self, cols: Vec<Col>) -> Self;
-    fn join(self, col: Col, on: Exp) -> Self;
+    fn join(self, col: Col, on: On) -> Self;
     fn left_join(self, col: Col, on: Exp) -> Self;
     fn right_join(self, col: Col, on: Exp) -> Self;
     // fn union(self, col: Col, on: Exp) -> Self;

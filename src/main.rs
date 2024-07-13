@@ -7,20 +7,11 @@ mod traits;
 
 use expressions::*;
 use mysql::*;
+use statements::*;
 use table::*;
 use traits::*;
 
 fn main() {
-    // let (query, args) = MYSQLBuilder::query()
-    //     .from(String::from("Table"))
-    //     .select(vec![
-    //         Col::new(String::from("Table"), String::from("Column")),
-    //         Col::new(String::from("Table"), String::from("Column")),
-    //     ])
-    //     .r#where(Col::new(String::from("Table"), String::from("Column")).eq(true.into()))
-    //     .r#where(Col::new(String::from("MoreTable"), String::from("SHWEET")).gt((7 as isize).into()))
-    //     .to_sql()
-    //     .unwrap();
 
     let (query, args) = MYSQLBuilder::query()
         .from("Table")
@@ -28,20 +19,25 @@ fn main() {
             Col::new("Table", "Column"),
             Col::new("Table", "Column"),
         ])
-        .r#where(Col::new("Table", "Column").eq(Col::new("Other", "Val")))
-        .r#where(Exp::exp_or(
-            Col::new("Table", "Column").eq(true),
-            Col::new("More Table", "SHWEET").gt(7),
-        ))
+        .join(
+            Col::new("Second", "Blue"),
+            On::new(Exp::exp_and(
+                Col::new("Table", "Column").eq(Col::new("Second", "Blue")),
+                Col::new("Second", "Deleted").is_null(),
+            )),
+        )
         .r#where(Exp::Set(vec![
-            Col::new("Table", "Column").eq(true),
-            Col::new("More Table", "SHWEET").gt(7),
+            Exp::exp_or(
+                Col::new("Table", "Column").eq(true),
+                Col::new("More Table", "SHWEET").gt(7),
+            ),
             Col::new("Table", "Column").eq(Col::new("Other", "Val")),
         ]))
+        .order(Order::new(Col::new("Second", "Blue"), Dir::Asc))
         .to_sql()
         .unwrap();
 
-    println!("{query}");
+    println!("\n{query}\n");
     for arg in args {
         println!("{:?}", arg);
     }

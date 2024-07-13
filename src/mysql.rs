@@ -51,8 +51,8 @@ impl QueryBuilder for MYSQLBuilder {
         self
     }
 
-    fn join(self, col: Col, on: Exp) -> Self {
-        self.do_join(col, on, JoinType::Inner)
+    fn join(self, col: Col, on: On) -> Self {
+        self.do_join(col, *on.exp, JoinType::Inner)
     }
 
     fn left_join(self, col: Col, on: Exp) -> Self {
@@ -147,7 +147,7 @@ impl MYSQLBuilder {
         self.joins.push(Join {
             from: col,
             join: join,
-            on: Some(On::new(Where::new(on))),
+            on: Some(On::new(on)),
         });
         self
     }

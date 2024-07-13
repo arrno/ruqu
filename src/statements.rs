@@ -52,28 +52,28 @@ impl ToSQL for Join {
         let (from_sql, from_args) = self.from.to_sql();
         let mut sql = format!("{join_str} {from_sql}");
         if let Some(on) = &self.on {
-            let (exp_sql, exp_args_op) = on.r#where.to_sql();
+            let (exp_sql, exp_args_op) = on.to_sql();
             if let Some(exp_args) = exp_args_op {
                 args.extend(exp_args)
             }
-            sql.push_str(format!("\n\tON ({exp_sql})").as_str());
+            sql.push_str(format!("\n\t{exp_sql}").as_str());
         };
         (sql, Some(args))
     }
 }
 
 pub struct On {
-    r#where: Where,
+    pub exp: Box<Exp>,
 }
 impl On {
-    pub fn new(r#where: Where) -> Self {
-        On { r#where }
+    pub fn new(exp: Exp) -> Self {
+        On { exp: Box::new(exp) }
     }
 }
 impl ToSQL for On {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
-        let (exp_sql, exp_args) = self.r#where.exp.to_sql();
-        (format!("ON ({exp_sql})"), exp_args)
+        let (exp_sql, exp_args) = self.exp.to_sql();
+        (format!("ON {exp_sql}"), exp_args)
     }
 }
 pub struct Where {
