@@ -30,7 +30,7 @@ This project is intended to replicate the features of [this project](https://dou
 produces:
 
 ```sql
-SELECT  DISTINCT `user`.`id`, `user`.`name`
+SELECT DISTINCT `user`.`id`, `user`.`name`
 FROM `user`
 JOIN `comment` ON ((`comment`.`user_id` = `user`.`id`) AND (`comment`.`deleted` IS NULL))
 WHERE (((`user`.`active` = ?) OR (`user`.`score` > ?)) AND (`comment`.`likes` = `comment`.`dislikes`))

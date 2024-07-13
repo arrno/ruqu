@@ -84,7 +84,7 @@ impl ToSQL for Select {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let mut query = String::from("SELECT ");
         if self.distinct {
-            query.push_str(" DISTINCT ");
+            query.push_str("DISTINCT ");
         }
         let mut selects = Vec::new();
         let mut args = Vec::new();
