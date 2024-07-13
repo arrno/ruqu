@@ -3,28 +3,28 @@
 This project is intended to replicate the features of [this project](https://doug-martin.github.io/goqu/docs/database.html) but in RUST 🦀! ATM the project is in progress. Here is a working example:
 
 ```rust
-    let (query, args) = MYSQLBuilder::query()
-        .from("user")
-        .select(vec![cl("user", "id"), cl("user", "name")])
-        .distinct()
-        .join(
-            tb("comment"),
-            On::new(Exp::exp_and(
-                cl("comment", "user_id").eq(cl("user", "id")),
-                cl("comment", "deleted").is_null(),
-            )),
-        )
-        .r#where(Exp::Set(vec![
-            Exp::exp_or(
-                cl("user", "active").eq(true),
-                cl("user", "score").gt(9),
-            ),
-            cl("comment", "likes").eq(cl("comment", "dislikes")),
-        ]))
-        .order(cl("user", "join_date"), Dir::Asc)
-        .limit(5)
-        .to_sql()
-        .unwrap();
+let (query, args) = MYSQLBuilder::query()
+    .from("user")
+    .select(vec![cl("user", "id"), cl("user", "name")])
+    .distinct()
+    .join(
+        tb("comment"),
+        On::new(Exp::exp_and(
+            cl("comment", "user_id").eq(cl("user", "id")),
+            cl("comment", "deleted").is_null(),
+        )),
+    )
+    .r#where(Exp::Set(vec![
+        Exp::exp_or(
+            cl("user", "active").eq(true),
+            cl("user", "score").gt(9),
+        ),
+        cl("comment", "likes").eq(cl("comment", "dislikes")),
+    ]))
+    .order(cl("user", "join_date"), Dir::Asc)
+    .limit(5)
+    .to_sql()
+    .unwrap();
 ```
 
 produces:
