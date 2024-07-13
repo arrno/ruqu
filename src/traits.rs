@@ -12,7 +12,7 @@ pub trait QueryBuilder {
     fn right_join(self, col: Col, on: Exp) -> Self;
     // fn union(self, col: Col, on: Exp) -> Self;
     fn r#where(self, exp: Exp) -> Self;
-    fn order(self, order: Order) -> Self;
+    fn order(self, by: Col, dir: Dir) -> Self;
     fn to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>>;
 }
 

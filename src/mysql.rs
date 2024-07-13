@@ -63,8 +63,8 @@ impl QueryBuilder for MYSQLBuilder {
         self.do_join(col, on, JoinType::Inner)
     }
 
-    fn order(mut self, order: Order) -> Self {
-        self.order.push(order);
+    fn order(mut self, by: Col, dir: Dir) -> Self {
+        self.order.push(Order::new(by, dir));
         self
     }
 

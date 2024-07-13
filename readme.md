@@ -23,7 +23,7 @@ let (query, args) = MYSQLBuilder::query()
         ),
         Col::new("Table", "Column").eq(Col::new("Other", "Val")),
     ]))
-    .order(Order::new(Col::new("Second", "Blue"), Dir::Asc))
+    .order(Col::new("Second", "Blue"), Dir::Asc)
     .to_sql()
     .unwrap();
 ```
