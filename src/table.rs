@@ -48,19 +48,13 @@ impl Wrapper {
     fn to_sql(&self, parent: &Col) -> String {
         let (parent_sql, _) = parent.to_sql();
         match self {
-            Wrapper::Count(Some(sub)) => match **sub {
-                Wrapper::Distinct => format!("COUNT(DISTINCT {parent_sql})"),
-                _ => format!("COUNT({parent_sql})"),
-            },
+            Wrapper::Count(Some(sub)) => format!("COUNT({})", sub.to_sql(parent)),
             Wrapper::Count(_) => format!("COUNT({parent_sql})"),
             Wrapper::Sum => format!("SUM({parent_sql})"),
             Wrapper::Max => format!("MAX({parent_sql})"),
             Wrapper::Min => format!("MIN({parent_sql})"),
             Wrapper::Avg => format!("AVG({parent_sql})"),
-            Wrapper::Concat(Some(sub)) => match **sub {
-                Wrapper::Distinct => format!("GROUP_CONCAT(DISTINCT {parent_sql})"),
-                _ => format!("GROUP_CONCAT({parent_sql})"),
-            },
+            Wrapper::Concat(Some(sub)) => format!("GROUP_CONCAT({})", sub.to_sql(parent)),
             Wrapper::Concat(_) => format!("GROUP_CONCAT({parent_sql})"),
             Wrapper::Instr(sub) => format!("INSTR({parent_sql}, {sub})"),
             Wrapper::Coalesce => format!("COALESCE({parent_sql})"),
