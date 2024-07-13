@@ -15,7 +15,7 @@ pub struct MYSQLBuilder {
     group_by: Option<GroupBy>,
 }
 
-impl QueryBuilder for MYSQLBuilder {
+impl QueryBuilder for MYSQLBuilder{
     fn query() -> Self {
         MYSQLBuilder {
             from: None,
@@ -28,6 +28,12 @@ impl QueryBuilder for MYSQLBuilder {
             group_by: None,
         }
     }
+    fn to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>> {
+        self.try_to_sql()
+    }
+}
+
+impl FetchQBuilder for MYSQLBuilder{
     fn from(mut self, table_name: &'static str) -> Self {
         self.from = Some(Table::new(table_name.to_string()));
         self
@@ -96,9 +102,6 @@ impl QueryBuilder for MYSQLBuilder {
     fn limit(mut self, by: i32) -> Self {
         self.limit = Some(Limit::new(by));
         self
-    }
-    fn to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>> {
-        self.try_to_sql()
     }
 }
 
