@@ -120,13 +120,13 @@ impl From<JoinType> for String {
 }
 
 pub struct Join {
-    from: Col,
+    from: Table,
     join: JoinType,
     on: Option<On>,
 }
 
 impl Join {
-    pub fn new(from: Col, join: JoinType, on: Option<On>) -> Self {
+    pub fn new(from: Table, join: JoinType, on: Option<On>) -> Self {
         Join { from, join, on }
     }
 }
@@ -134,14 +134,14 @@ impl ToSQL for Join {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let join_str: String = self.join.clone().into();
         let mut args = vec![];
-        let (from_sql, from_args) = self.from.to_sql();
+        let (from_sql, _) = self.from.to_sql();
         let mut sql = format!("{join_str} {from_sql}");
         if let Some(on) = &self.on {
             let (exp_sql, exp_args_op) = on.to_sql();
             if let Some(exp_args) = exp_args_op {
                 args.extend(exp_args)
             }
-            sql.push_str(format!("\n\t{exp_sql}").as_str());
+            sql.push_str(format!(" {exp_sql}").as_str());
         };
         (sql, Some(args))
     }

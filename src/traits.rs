@@ -8,9 +8,9 @@ pub trait QueryBuilder {
     fn from(self, table_name: &'static str) -> Self;
     fn select(self, cols: Vec<Col>) -> Self;
     fn distinct(self) -> Self;
-    fn join(self, col: Col, on: On) -> Self;
-    fn left_join(self, col: Col, on: Exp) -> Self;
-    fn right_join(self, col: Col, on: Exp) -> Self;
+    fn join(self, table: Table, on: On) -> Self;
+    fn left_join(self, table: Table, on: Exp) -> Self;
+    fn right_join(self, table: Table, on: Exp) -> Self;
     fn union(self, query: Self) -> Self;
     fn r#where(self, exp: Exp) -> Self;
     fn order(self, by: Col, dir: Dir) -> Self;

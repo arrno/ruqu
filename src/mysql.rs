@@ -59,31 +59,31 @@ impl QueryBuilder for MYSQLBuilder {
         };
         self
     }
-    fn join(self, col: Col, on: On) -> Self {
-        self.do_join(col, *on.exp, JoinType::Inner)
+    fn join(self, table: Table, on: On) -> Self {
+        self.do_join(table, *on.exp, JoinType::Inner)
     }
-    fn left_join(self, col: Col, on: Exp) -> Self {
-        self.do_join(col, on, JoinType::Inner)
+    fn left_join(self, table: Table, on: Exp) -> Self {
+        self.do_join(table, on, JoinType::Inner)
     }
-    fn right_join(self, col: Col, on: Exp) -> Self {
-        self.do_join(col, on, JoinType::Inner)
+    fn right_join(self, table: Table, on: Exp) -> Self {
+        self.do_join(table, on, JoinType::Inner)
     }
     fn union(mut self, query: Self) -> Self {
         self.unions.push(query);
         self
     }
-    fn group_by(mut self, by: Col) -> Self{
+    fn group_by(mut self, by: Col) -> Self {
         match self.group_by {
             Some(mut group_by) => {
                 group_by.extend(vec![by]);
                 self.group_by = Some(group_by);
-            },
+            }
             None => self.group_by = Some(GroupBy::new(vec![by])),
         };
         self
     }
-    fn having(mut self, exp: ExpU) -> Self{
-        if let Some(mut group_by) =  self.group_by {
+    fn having(mut self, exp: ExpU) -> Self {
+        if let Some(mut group_by) = self.group_by {
             group_by.having(exp);
             self.group_by = Some(group_by);
         }
@@ -142,11 +142,15 @@ impl MYSQLBuilder {
             query.push_str(order_query.as_str());
         }
         let (group_query, group_args) = self.unpack_element(&self.group_by);
-        query.push_str(format!("\n{group_query}").as_str());
-        args.extend(group_args);
+        if group_query.len() > 0 {
+            query.push_str(format!("\n{group_query}").as_str());
+            args.extend(group_args);
+        }
         let (limit_query, limit_args) = self.unpack_element(&self.limit);
-        query.push_str(format!("\n{limit_query}").as_str());
-        args.extend(limit_args);
+        if limit_query.len() > 0 {
+            query.push_str(format!("\n{limit_query}").as_str());
+            args.extend(limit_args);
+        }
         for qb in &self.unions {
             let (union_query, union_args) = qb.to_sql()?;
             query.push_str(format!("\nUNION\n{union_query}").as_str());
@@ -187,8 +191,8 @@ impl MYSQLBuilder {
         }
     }
 
-    fn do_join(mut self, col: Col, on: Exp, join: JoinType) -> Self {
-        self.joins.push(Join::new(col, join, Some(On::new(on))));
+    fn do_join(mut self, table: Table, on: Exp, join: JoinType) -> Self {
+        self.joins.push(Join::new(table, join, Some(On::new(on))));
         self
     }
 }

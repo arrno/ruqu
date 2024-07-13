@@ -13,23 +13,22 @@ use traits::*;
 
 fn main() {
     let (query, args) = MYSQLBuilder::query()
-        .from("Table")
-        .select(vec![cl("Table", "Column"), cl("Table", "Column")])
+        .from("user")
+        .select(vec![cl("user", "id"), cl("user", "name")])
+        .distinct()
         .join(
-            cl("Second", "Blue"),
+            tb("comment"),
             On::new(Exp::exp_and(
-                cl("Table", "Column").eq(cl("Second", "Blue")),
-                cl("Second", "Deleted").is_null(),
+                cl("comment", "user_id").eq(cl("user", "id")),
+                cl("comment", "deleted").is_null(),
             )),
         )
         .r#where(Exp::Set(vec![
-            Exp::exp_or(
-                cl("Table", "Column").eq(true),
-                cl("More Table", "SHWEET").gt(7),
-            ),
-            cl("Table", "Column").eq(cl("Other", "Val")),
+            Exp::exp_or(cl("user", "active").eq(true), cl("user", "score").gt(9)),
+            cl("comment", "likes").eq(cl("comment", "dislikes")),
         ]))
-        .order(cl("Second", "Blue"), Dir::Asc)
+        .order(cl("user", "join_date"), Dir::Asc)
+        .limit(5)
         .to_sql()
         .unwrap();
 

@@ -7,6 +7,10 @@ pub struct Table {
     name: String,
 }
 
+pub fn tb(table_name: &'static str) -> Table {
+    Table::new(table_name.to_string())
+}
+
 impl Table {
     pub fn new(name: String) -> Self {
         return Table { name: name };
