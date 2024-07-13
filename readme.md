@@ -6,24 +6,24 @@ This project is intended to replicate the features of [this project](https://dou
 let (query, args) = MYSQLBuilder::query()
     .from("Table")
     .select(vec![
-        Col::new("Table", "Column"),
-        Col::new("Table", "Column"),
+        Cl("Table", "Column"),
+        Cl("Table", "Column"),
     ])
     .join(
-        Col::new("Second", "Blue"),
+        Cl("Second", "Blue"),
         On::new(Exp::exp_and(
-            Col::new("Table", "Column").eq(Col::new("Second", "Blue")),
-            Col::new("Second", "Deleted").is_null(),
+            Cl("Table", "Column").eq(Cl("Second", "Blue")),
+            Cl("Second", "Deleted").is_null(),
         )),
     )
     .r#where(Exp::Set(vec![
         Exp::exp_or(
-            Col::new("Table", "Column").eq(true),
-            Col::new("More Table", "SHWEET").gt(7),
+            Cl("Table", "Column").eq(true),
+            Cl("More Table", "SHWEET").gt(7),
         ),
-        Col::new("Table", "Column").eq(Col::new("Other", "Val")),
+        Cl("Table", "Column").eq(Cl("Other", "Val")),
     ]))
-    .order(Col::new("Second", "Blue"), Dir::Asc)
+    .order(Cl("Second", "Blue"), Dir::Asc)
     .to_sql()
     .unwrap();
 ```

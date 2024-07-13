@@ -33,6 +33,10 @@ pub struct Col {
     pub alias: Option<String>,
 }
 
+pub fn Cl(table: &'static str, col: &'static str) -> Col {
+    Col::new(table, col)
+}
+
 impl Col {
     pub fn new(table: &'static str, col: &'static str) -> Self {
         Col {
