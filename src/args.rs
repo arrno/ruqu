@@ -49,7 +49,6 @@ impl ToArg for f64 {
         Arg::Float(self)
     }
 }
-
 impl ToArg for Vec<usize> {
     fn to_arg(self) -> Arg {
         Arg::Set(self.into_iter().map(|x| x.to_arg()).collect())
@@ -75,6 +74,7 @@ impl ToArg for Vec<f64> {
         Arg::Set(self.into_iter().map(|x| x.to_arg()).collect())
     }
 }
+
 #[derive(Debug)]
 pub enum Arg {
     Uint(usize),
@@ -85,6 +85,7 @@ pub enum Arg {
     Set(Vec<Arg>),
     Null,
 }
+
 impl Clone for Arg {
     fn clone(&self) -> Self {
         match self {

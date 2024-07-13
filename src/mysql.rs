@@ -8,19 +8,20 @@ pub struct MYSQLBuilder {
     from: Option<Table>,
     select: Option<Select>,
     joins: Vec<Join>,
+    unions: Vec<MYSQLBuilder>,
     r#where: Option<Where>,
     order: Vec<Order>,
     limit: Option<Limit>,
     group_by: Option<GroupBy>,
 }
 
-// TODO impl QueryBuilder
 impl QueryBuilder for MYSQLBuilder {
     fn query() -> Self {
         MYSQLBuilder {
             from: None,
             select: None,
             joins: vec![],
+            unions: vec![],
             r#where: None,
             order: vec![],
             limit: None,
@@ -40,7 +41,13 @@ impl QueryBuilder for MYSQLBuilder {
         }
         self
     }
-
+    fn distinct(mut self) -> Self {
+        if let Some(mut select) = self.select {
+            select.distinct();
+            self.select = Some(select);
+        }
+        self
+    }
     fn r#where(mut self, exp: Exp) -> Self {
         match self.r#where {
             Some(where_clause) => {
@@ -52,24 +59,44 @@ impl QueryBuilder for MYSQLBuilder {
         };
         self
     }
-
     fn join(self, col: Col, on: On) -> Self {
         self.do_join(col, *on.exp, JoinType::Inner)
     }
-
     fn left_join(self, col: Col, on: Exp) -> Self {
         self.do_join(col, on, JoinType::Inner)
     }
-
     fn right_join(self, col: Col, on: Exp) -> Self {
         self.do_join(col, on, JoinType::Inner)
     }
-
+    fn union(mut self, query: Self) -> Self {
+        self.unions.push(query);
+        self
+    }
+    fn group_by(mut self, by: Col) -> Self{
+        match self.group_by {
+            Some(mut group_by) => {
+                group_by.extend(vec![by]);
+                self.group_by = Some(group_by);
+            },
+            None => self.group_by = Some(GroupBy::new(vec![by])),
+        };
+        self
+    }
+    fn having(mut self, exp: ExpU) -> Self{
+        if let Some(mut group_by) =  self.group_by {
+            group_by.having(exp);
+            self.group_by = Some(group_by);
+        }
+        self
+    }
     fn order(mut self, by: Col, dir: Dir) -> Self {
         self.order.push(Order::new(by, dir));
         self
     }
-
+    fn limit(mut self, by: i32) -> Self {
+        self.limit = Some(Limit::new(by));
+        self
+    }
     fn to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>> {
         self.try_to_sql()
     }
@@ -81,6 +108,7 @@ impl MYSQLBuilder {
             select: None,
             from: None,
             joins: vec![],
+            unions: vec![],
             r#where: None,
             order: vec![],
             limit: None,
@@ -119,6 +147,11 @@ impl MYSQLBuilder {
         let (limit_query, limit_args) = self.unpack_element(&self.limit);
         query.push_str(format!("\n{limit_query}").as_str());
         args.extend(limit_args);
+        for qb in &self.unions {
+            let (union_query, union_args) = qb.to_sql()?;
+            query.push_str(format!("\nUNION\n{union_query}").as_str());
+            args.extend(union_args);
+        }
         Ok((query, args))
     }
 
@@ -137,6 +170,7 @@ impl MYSQLBuilder {
             None => (String::from(""), vec![]),
         }
     }
+
     fn unpack_element_ref<T>(&self, element: &Option<&T>) -> (String, Vec<Arg>)
     where
         T: ToSQL,

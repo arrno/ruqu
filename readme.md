@@ -40,8 +40,9 @@ ORDER BY `Second`.`Blue` ASC
 ```
 
 TODO
-- Limit, GroupBy, Having,
-- Select distinct
+- ~~Limit, GroupBy, Having~~
+- ~~Select distinct~~
+- ~~Union Join~~
 - ColumnFunctions: 
     - Count(Distinct)
     - Sum, Max, Min, Avg
@@ -49,5 +50,4 @@ TODO
     - Like
     - Instr
     - coalesce
-- Union Join
 - Update, Insert, Delete

@@ -4,6 +4,11 @@ use crate::table::*;
 use crate::traits::*;
 
 pub struct Limit(i32);
+impl Limit {
+    pub fn new(by: i32) -> Self {
+        Limit(by)
+    }
+}
 impl ToSQL for Limit {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         (format!("LIMIT {}", self.0), None)
@@ -13,6 +18,21 @@ impl ToSQL for Limit {
 pub struct GroupBy {
     cols: Vec<Col>,
     having: Option<Box<ExpU>>,
+}
+
+impl GroupBy {
+    pub fn new(cols: Vec<Col>) -> Self {
+        GroupBy {
+            cols: cols,
+            having: None,
+        }
+    }
+    pub fn extend(&mut self, cols: Vec<Col>) {
+        self.cols.extend(cols);
+    }
+    pub fn having(&mut self, exp: ExpU) {
+        self.having = Some(Box::new(exp));
+    }
 }
 
 impl ToSQL for GroupBy {
@@ -44,6 +64,7 @@ pub struct Select {
     cols: Vec<Col>,
     distinct: bool,
 }
+
 impl Select {
     pub fn new(cols: Vec<Col>) -> Self {
         Select {
@@ -54,7 +75,11 @@ impl Select {
     pub fn extend(&mut self, cols: Vec<Col>) {
         self.cols.extend(cols);
     }
+    pub fn distinct(&mut self) {
+        self.distinct = true;
+    }
 }
+
 impl ToSQL for Select {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let mut query = String::from("SELECT ");
@@ -82,6 +107,7 @@ pub enum JoinType {
     Right,
     Union,
 }
+
 impl From<JoinType> for String {
     fn from(join: JoinType) -> Self {
         match join {
@@ -92,11 +118,13 @@ impl From<JoinType> for String {
         }
     }
 }
+
 pub struct Join {
     from: Col,
     join: JoinType,
     on: Option<On>,
 }
+
 impl Join {
     pub fn new(from: Col, join: JoinType, on: Option<On>) -> Self {
         Join { from, join, on }
@@ -122,6 +150,7 @@ impl ToSQL for Join {
 pub struct On {
     pub exp: Box<Exp>,
 }
+
 impl On {
     pub fn new(exp: Exp) -> Self {
         On { exp: Box::new(exp) }
@@ -136,6 +165,7 @@ impl ToSQL for On {
 pub struct Where {
     pub exp: Box<Exp>,
 }
+
 impl Where {
     pub fn new(exp: Exp) -> Self {
         Where { exp: Box::new(exp) }
@@ -148,13 +178,11 @@ impl ToSQL for Where {
     }
 }
 
-// TODO
-// struct GroupBy {}
-
 pub enum Dir {
     Asc,
     Desc,
 }
+
 impl ToSQL for Dir {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         match self {
@@ -167,6 +195,7 @@ pub struct Order {
     by: Col,
     dir: Dir,
 }
+
 impl Order {
     pub fn new(by: Col, dir: Dir) -> Self {
         Order { by, dir }

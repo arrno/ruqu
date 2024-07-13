@@ -12,6 +12,7 @@ pub enum Op {
     Is,
     IsNot,
 }
+
 impl ToSQL for Op {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         match self {
@@ -32,6 +33,7 @@ pub enum Exp {
     Set(Vec<Exp>),
     Or(Or),
 }
+
 impl ToSQL for Exp {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         match self {
@@ -53,6 +55,7 @@ impl ToSQL for Exp {
         }
     }
 }
+
 impl Exp {
     pub fn exp_and(left: Exp, right: Exp) -> Self {
         Exp::And(And {
@@ -84,6 +87,7 @@ pub struct And {
     left: Box<Exp>,
     right: Box<Exp>,
 }
+
 impl ToSQL for And {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let mut args = vec![];
@@ -98,10 +102,12 @@ impl ToSQL for And {
         (format!("({left_exp} AND {right_exp})"), Some(args))
     }
 }
+
 pub struct Or {
     left: Box<Exp>,
     right: Box<Exp>,
 }
+
 impl ToSQL for Or {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let mut args = vec![];
@@ -123,6 +129,7 @@ pub enum ExpTar {
     Null,
     T(MYSQLBuilder),
 }
+
 pub trait ToExpTar {
     fn to_exp_tar(self) -> ExpTar;
 }
@@ -170,6 +177,7 @@ impl ToSQL for ExpTar {
         }
     }
 }
+
 pub struct ExpU {
     op: Op,
     left: ExpTar,
