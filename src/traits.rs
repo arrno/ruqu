@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 pub trait QueryBuilder {
     fn query() -> Self;
-    fn to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>>;
+    fn to_sql(&self) -> (String, Vec<Arg>);
 }
 
 pub trait FetchQBuilder {

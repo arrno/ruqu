@@ -28,8 +28,47 @@ impl QueryBuilder for MYSQLBuilder {
             group_by: None,
         }
     }
-    fn to_sql(&self) -> Result<(String, Vec<Arg>), Box<dyn std::error::Error>> {
-        self.try_to_sql()
+    fn to_sql(&self) -> (String, Vec<Arg>) {
+        let (mut query, mut args) = self.unpack_element(&self.select);
+        let (from_query, from_args) = self.unpack_element(&self.from);
+        query.push_str(format!("\nFROM {from_query}").as_str());
+        args.extend(from_args);
+        for join in &self.joins {
+            let (join_query, join_args) = self.unpack_element_ref(&Some(join));
+            query.push_str(format!("\n{join_query}").as_str());
+            args.extend(join_args);
+        }
+        for r#where in &self.r#where {
+            let (where_query, where_args) = self.unpack_element_ref(&Some(r#where));
+            query.push_str(format!("\n{where_query}").as_str());
+            args.extend(where_args);
+        }
+        let mut order_query_strings = vec![];
+        for order in &self.order {
+            let (or_query, order_args) = self.unpack_element_ref(&Some(order));
+            order_query_strings.push(or_query);
+            args.extend(order_args);
+        }
+        if order_query_strings.len() > 0 {
+            let order_query = format!("\nORDER BY {}", order_query_strings.join(", "));
+            query.push_str(order_query.as_str());
+        }
+        let (group_query, group_args) = self.unpack_element(&self.group_by);
+        if group_query.len() > 0 {
+            query.push_str(format!("\n{group_query}").as_str());
+            args.extend(group_args);
+        }
+        let (limit_query, limit_args) = self.unpack_element(&self.limit);
+        if limit_query.len() > 0 {
+            query.push_str(format!("\n{limit_query}").as_str());
+            args.extend(limit_args);
+        }
+        for qb in &self.unions {
+            let (union_query, union_args) = qb.to_sql();
+            query.push_str(format!("\nUNION\n{union_query}").as_str());
+            args.extend(union_args);
+        }
+        (query, args)
     }
 }
 
@@ -155,7 +194,7 @@ impl MYSQLBuilder {
             args.extend(limit_args);
         }
         for qb in &self.unions {
-            let (union_query, union_args) = qb.to_sql()?;
+            let (union_query, union_args) = qb.to_sql();
             query.push_str(format!("\nUNION\n{union_query}").as_str());
             args.extend(union_args);
         }

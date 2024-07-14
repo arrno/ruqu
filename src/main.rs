@@ -37,8 +37,7 @@ fn main() {
         ]))
         .order(cl("user", "join_date"), Dir::Asc)
         .limit(5)
-        .to_sql()
-        .unwrap();
+        .to_sql();
 
     println!("\n{query}\n");
     for arg in args {

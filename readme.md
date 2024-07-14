@@ -23,8 +23,7 @@ let (query, args) = MYSQLBuilder::query()
     ]))
     .order(cl("user", "join_date"), Dir::Asc)
     .limit(5)
-    .to_sql()
-    .unwrap();
+    .to_sql();
 ```
 
 produces:
