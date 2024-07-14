@@ -15,7 +15,12 @@ fn main() {
     let (query, args) = MYSQLBuilder::query()
         .from("user")
         .select(vec![
-            cl("user", "id").distinct().count().as_alias("user_count"), // I think it would be better if we just always wrap whats on the left with what's on the right.
+            cl("user", "id")
+                .max()
+                .min()
+                .count()
+                .instr("hello")
+                .as_alias("my_val"),
             cl("user", "name"),
         ])
         // .distinct()

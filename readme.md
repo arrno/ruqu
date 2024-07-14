@@ -45,10 +45,10 @@ TODO
 - ~~Limit, GroupBy, Having~~
 - ~~Select distinct~~
 - ~~Union Join~~
-- ColumnFunctions: 
-    - Count(Distinct)
-    - Sum, Max, Min, Avg
-    - GroupConcat(Distinct, Order)
-    - Instr
-    - Coalesce
+- ~~ColumnFunctions~~: 
+    - ~~Count(Distinct)~~
+    - ~~Sum, Max, Min, Avg~~
+    - ~~GroupConcat(Distinct, Order)~~
+    - ~~Instr~~
+    - ~~Coalesce~~
 - Update, Insert, Delete
