@@ -14,8 +14,11 @@ use traits::*;
 fn main() {
     let (query, args) = MYSQLBuilder::query()
         .from("user")
-        .select(vec![cl("user", "id"), cl("user", "name")])
-        .distinct()
+        .select(vec![
+            cl("user", "id").distinct().count().as_alias("user_count"),
+            cl("user", "name"),
+        ])
+        // .distinct()
         .join(
             tb("comment"),
             On::new(Exp::exp_and(
