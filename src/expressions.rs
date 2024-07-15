@@ -3,6 +3,10 @@ use crate::mysql::*;
 use crate::table::*;
 use crate::traits::*;
 
+pub fn set_to_sql() {}
+
+pub fn insert_to_sql() {}
+
 pub enum Op {
     Eq,
     Neq,
@@ -173,7 +177,7 @@ impl ToSQL for ExpTar {
             ExpTar::A(arg) => (String::from("?"), Some(vec![arg.clone()])),
             ExpTar::C(col) => (col.to_sql().0, None),
             ExpTar::T(sub_query_builder) => {
-                let (sub_query, sub_args) = sub_query_builder.try_to_sql().unwrap();
+                let (sub_query, sub_args) = sub_query_builder.to_sql();
                 (format!("({sub_query})"), Some(sub_args))
             }
         }

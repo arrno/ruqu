@@ -17,25 +17,26 @@ pub trait FetchQBuilder {
     fn left_join(self, table: Table, on: Exp) -> Self;
     fn right_join(self, table: Table, on: Exp) -> Self;
     fn union(self, query: Self) -> Self;
-    fn r#where(self, exp: Exp) -> Self;
     fn order(self, by: Col, dir: Dir) -> Self;
     fn group_by(self, by: Col) -> Self;
     fn having(self, exp: ExpU) -> Self;
     fn limit(self, by: i32) -> Self;
 }
 
-pub trait UpdateQBuilder {
-    fn update(table: Table, set: Vec<Exp>) -> Self;
+pub trait WhereQBuilder {
     fn r#where(self, exp: Exp) -> Self;
+}
+
+pub trait UpdateQBuilder {
+    fn update(self, table: Table, set: Vec<Exp>) -> Self;
 }
 
 pub trait InsertQBuilder {
-    fn insert(table: Table, data: Vec<HashMap<String, impl ToArg>>) -> Self;
+    fn insert(self, table: Table, data: Vec<HashMap<String, impl ToArg>>) -> Self;
 }
 
 pub trait DeleteQBuilder {
-    fn delete(table: Table) -> Self;
-    fn r#where(self, exp: Exp) -> Self;
+    fn delete(self, table: Table) -> Self;
 }
 
 pub trait ToSQL {
