@@ -151,10 +151,10 @@ impl DeleteQBuilder for MYSQLBuilder {
 impl InsertQBuilder for MYSQLBuilder {
     fn insert(mut self, table: Table) -> Self {
         self.from = Some(table);
-        self.query_type = QueryType::Insert;;
+        self.query_type = QueryType::Insert;
         self
     }
-    fn add(mut self, keys: Vec<String>, values: Vec<Vec<impl RefToArg>>) -> Self {
+    fn add(mut self, keys: Vec<String>, values: Vec<Vec<Arg>>) -> Self {
         self.insert = Some(Insert::new(keys, values));
         self
     }

@@ -5,6 +5,9 @@ mod statements;
 mod table;
 mod traits;
 
+use std::vec;
+
+use args::*;
 use expressions::*;
 use mysql::*;
 use statements::*;
@@ -43,4 +46,13 @@ fn main() {
     for arg in args {
         println!("{:?}", arg);
     }
+
+    MYSQLBuilder::query().insert(tb("user")).add(
+        vec!["name".to_string(), "age".to_string(), "active".to_string()],
+        vec![
+            vec![arg("Jake"), arg(23), arg(false)],
+            vec![arg("Sally"), arg(42), arg(true)],
+            vec![arg("Jasper"), arg(18), arg(true)],
+        ],
+    );
 }

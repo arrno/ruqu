@@ -34,7 +34,7 @@ pub trait UpdateQBuilder {
 
 pub trait InsertQBuilder {
     fn insert(self, table: Table) -> Self;
-    fn add(self, keys: Vec<String>, values: Vec<Vec<impl RefToArg>>) -> Self;
+    fn add(self, keys: Vec<String>, values: Vec<Vec<Arg>>) -> Self;
 }
 
 pub trait DeleteQBuilder {

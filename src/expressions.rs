@@ -27,13 +27,10 @@ pub struct Insert {
     values: Vec<Vec<Arg>>,
 }
 impl Insert {
-    pub fn new(keys: Vec<String>, values: Vec<Vec<impl RefToArg>>) -> Self {
+    pub fn new(keys: Vec<String>, values: Vec<Vec<Arg>>) -> Self {
         Insert {
             keys: keys,
-            values: values
-                .into_iter()
-                .map(|vals| vals.iter().map(|val| val.to_arg()).collect())
-                .collect(),
+            values: values,
         }
     }
 }
