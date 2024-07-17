@@ -28,11 +28,13 @@ pub trait WhereQBuilder {
 }
 
 pub trait UpdateQBuilder {
-    fn update(self, table: Table, set: Vec<Exp>) -> Self;
+    fn update(self, table: Table) -> Self;
+    fn set(self, set: Vec<Exp>) -> Self;
 }
 
 pub trait InsertQBuilder {
-    fn insert(self, table: Table, keys: Vec<String>, values: Vec<Vec<impl RefToArg>>) -> Self;
+    fn insert(self, table: Table) -> Self;
+    fn add(self, keys: Vec<String>, values: Vec<Vec<impl RefToArg>>) -> Self;
 }
 
 pub trait DeleteQBuilder {

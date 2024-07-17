@@ -129,10 +129,13 @@ impl WhereQBuilder for MYSQLBuilder {
 }
 
 impl UpdateQBuilder for MYSQLBuilder {
-    fn update(mut self, table: Table, set: Vec<Exp>) -> Self {
+    fn update(mut self, table: Table) -> Self {
         self.from = Some(table);
-        self.set = Some(Set::new(set));
         self.query_type = QueryType::Update;
+        self
+    }
+    fn set(mut self, set: Vec<Exp>) -> Self {
+        self.set = Some(Set::new(set));
         self
     }
 }
@@ -146,9 +149,12 @@ impl DeleteQBuilder for MYSQLBuilder {
 }
 
 impl InsertQBuilder for MYSQLBuilder {
-    fn insert(mut self, table: Table, keys: Vec<String>, values: Vec<Vec<impl RefToArg>>) -> Self {
+    fn insert(mut self, table: Table) -> Self {
         self.from = Some(table);
-        self.query_type = QueryType::Insert;
+        self.query_type = QueryType::Insert;;
+        self
+    }
+    fn add(mut self, keys: Vec<String>, values: Vec<Vec<impl RefToArg>>) -> Self {
         self.insert = Some(Insert::new(keys, values));
         self
     }
