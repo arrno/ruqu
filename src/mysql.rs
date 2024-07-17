@@ -18,8 +18,8 @@ pub struct MYSQLBuilder {
     joins: Vec<Join>,
     unions: Vec<MYSQLBuilder>,
     r#where: Option<Where>,
-    set: Vec<Exp>,
-    insert: Option<Vec<HashMap<String, Arg>>>,
+    set: Option<Set>,
+    insert: Option<Insert>,
     order: Vec<Order>,
     limit: Option<Limit>,
     group_by: Option<GroupBy>,
@@ -34,7 +34,7 @@ impl QueryBuilder for MYSQLBuilder {
             joins: vec![],
             unions: vec![],
             r#where: None,
-            set: vec![],
+            set: None,
             insert: None,
             order: vec![],
             limit: None,
@@ -131,7 +131,7 @@ impl WhereQBuilder for MYSQLBuilder {
 impl UpdateQBuilder for MYSQLBuilder {
     fn update(mut self, table: Table, set: Vec<Exp>) -> Self {
         self.from = Some(table);
-        self.set = set;
+        self.set = Some(Set::new(set));
         self.query_type = QueryType::Update;
         self
     }
@@ -146,13 +146,10 @@ impl DeleteQBuilder for MYSQLBuilder {
 }
 
 impl InsertQBuilder for MYSQLBuilder {
-    fn insert(mut self, table: Table, data: Vec<HashMap<String, impl ToArg>>) -> Self {
+    fn insert(mut self, table: Table, keys: Vec<String>, values: Vec<Vec<impl RefToArg>>) -> Self {
         self.from = Some(table);
         self.query_type = QueryType::Insert;
-        self.insert = data
-            .into_iter()
-            .map(|data| Some(data.into_iter().map(|(k, v)| (k, v.to_arg())).collect()))
-            .collect();
+        self.insert = Some(Insert::new(keys, values));
         self
     }
 }
@@ -165,7 +162,7 @@ impl MYSQLBuilder {
             joins: vec![],
             unions: vec![],
             r#where: None,
-            set: vec![],
+            set: None,
             insert: None,
             order: vec![],
             limit: None,

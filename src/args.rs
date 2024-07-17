@@ -3,6 +3,9 @@ use crate::table::*;
 pub trait ToArg {
     fn to_arg(self) -> Arg;
 }
+pub trait RefToArg {
+    fn to_arg(&self) -> Arg;
+}
 
 impl ToArg for usize {
     fn to_arg(self) -> Arg {

@@ -32,7 +32,7 @@ pub trait UpdateQBuilder {
 }
 
 pub trait InsertQBuilder {
-    fn insert(self, table: Table, data: Vec<HashMap<String, impl ToArg>>) -> Self;
+    fn insert(self, table: Table, keys: Vec<String>, values: Vec<Vec<impl RefToArg>>) -> Self;
 }
 
 pub trait DeleteQBuilder {

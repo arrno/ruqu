@@ -3,9 +3,58 @@ use crate::mysql::*;
 use crate::table::*;
 use crate::traits::*;
 
-pub fn set_to_sql() {}
+pub struct Set(Vec<Exp>);
+impl Set {
+    pub fn new(val: Vec<Exp>) -> Self {
+        Set(val)
+    }
+}
+impl ToSQL for Set {
+    fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
+        (
+            self.0
+                .iter()
+                .map(|e| e.to_sql().0)
+                .collect::<Vec<String>>()
+                .join(", "),
+            None,
+        )
+    }
+}
 
-pub fn insert_to_sql() {}
+pub struct Insert {
+    keys: Vec<String>,
+    values: Vec<Vec<Arg>>,
+}
+impl Insert {
+    pub fn new(keys: Vec<String>, values: Vec<Vec<impl RefToArg>>) -> Self {
+        Insert {
+            keys: keys,
+            values: values
+                .into_iter()
+                .map(|vals| vals.iter().map(|val| val.to_arg()).collect())
+                .collect(),
+        }
+    }
+}
+impl ToSQL for Insert {
+    fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
+        let key_query = format!("({})", self.keys.join(", "));
+        let values_query = (0..self.values.len())
+            .map(|_| {
+                format!(
+                    "\t({})",
+                    (0..self.keys.len())
+                        .map(|_| "?")
+                        .collect::<Vec<&str>>()
+                        .join(", ")
+                )
+            })
+            .collect::<Vec<String>>()
+            .join(",\n");
+        (format!("{key_query} VALUES\n {values_query}"), None)
+    }
+}
 
 pub enum Op {
     Eq,
