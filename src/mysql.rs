@@ -223,6 +223,7 @@ impl MYSQLBuilder {
         (query, args)
     }
 
+    // TODO
     fn to_update_sql(&self) -> (String, Vec<Arg>) {
         // UPDATE {from} SET {set} WHERE {where};
         (String::from(""), vec![])
@@ -238,7 +239,14 @@ impl MYSQLBuilder {
     }
 
     fn to_delete_sql(&self) -> (String, Vec<Arg>) {
-        (String::from(""), vec![])
+        let (from_query, mut args) = self.unpack_element(&self.from);
+        let (where_query, where_args) = self.unpack_element(&self.r#where);
+        let mut query = format!("DELETE FROM {}", from_query);
+        if where_query.len() > 0 {
+            query.push_str(format!(" {where_query}").as_str());
+            args.extend(where_args);
+        }
+        (query, args)
     }
 
     fn unpack_element<T>(&self, element: &Option<T>) -> (String, Vec<Arg>)

@@ -43,7 +43,7 @@ fn main() {
         .to_sql();
 
     println!("\n{query}\n");
-    for arg in args {
+    for arg in &args {
         println!("{:?}", arg);
     }
 
@@ -60,7 +60,17 @@ fn main() {
         .to_sql();
 
     println!("\n{queryy}\n");
-    for arg in argss {
+    for arg in &argss {
+        println!("{:?}", arg);
+    }
+
+    let (queryyy, argsss) = MYSQLBuilder::query()
+        .delete(tb("user"))
+        .r#where(cl("user", "active").neq(true))
+        .to_sql();
+
+    println!("\n{queryyy}\n");
+    for arg in argsss {
         println!("{:?}", arg);
     }
 }
