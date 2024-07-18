@@ -2,7 +2,6 @@ use crate::args::*;
 use crate::expressions::*;
 use crate::statements::*;
 use crate::table::*;
-use std::collections::HashMap;
 
 pub trait QueryBuilder {
     fn query() -> Self;

@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use crate::args::*;
 use crate::mysql::*;
 use crate::table::*;

@@ -3,7 +3,6 @@ use crate::expressions::*;
 use crate::statements::*;
 use crate::table::*;
 use crate::traits::*;
-use std::collections::HashMap;
 
 enum QueryType {
     Select,

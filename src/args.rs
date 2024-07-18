@@ -1,5 +1,3 @@
-use crate::table::*;
-
 pub trait ToArg {
     fn to_arg(self) -> Arg;
 }
