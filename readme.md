@@ -1,6 +1,8 @@
 # goqu clone in rust
 
-This project is intended to replicate the features of [this project](https://doug-martin.github.io/goqu/docs/database.html) but in RUST 🦀! ATM the project is in progress. Here is a working example:
+This project is intended to replicate the features of [this project](https://doug-martin.github.io/goqu/docs/database.html) but in RUST 🦀! ATM the project is in progress. Here are a few working examples:
+
+### Query
 
 ```rust
 let (query, args) = MYSQLBuilder::query()
@@ -40,7 +42,59 @@ LIMIT 5
 -- Int(7)
 ```
 
-TODO
+### Insert
+
+```rust
+let (query, args) = MYSQLBuilder::query()
+    .insert(tb("user"))
+    .rows(
+        vec!["name", "age", "active"],
+        vec![
+            vec![arg("Jake"), arg(23), arg(false)],
+            vec![arg("Sally"), arg(42), arg(true)],
+            vec![arg("Jasper"), arg(18), arg(true)],
+        ],
+    )
+    .to_sql();
+```
+
+produces:
+
+```sql
+INSERT INTO `user` (`name`, `age`, `active`) 
+VALUES
+        (?, ?, ?),
+        (?, ?, ?),
+        (?, ?, ?)
+
+-- Str("Jake")
+-- Int(23)
+-- Bool(false)
+-- Str("Sally")
+-- Int(42)
+-- Bool(true)
+-- ...
+```
+
+### Delete
+
+```rust
+let (query, args) = MYSQLBuilder::query()
+    .delete(tb("user"))
+    .r#where(cl("user", "active").neq(true))
+    .to_sql();
+```
+
+produces:
+
+```sql
+DELETE FROM `user` WHERE (`user`.`active` != ?)
+
+-- Bool(true)
+```
+
+## Todo
+
 - ~~Limit, GroupBy, Having~~
 - ~~Select distinct~~
 - ~~Union Join~~
