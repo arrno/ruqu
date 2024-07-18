@@ -47,12 +47,20 @@ fn main() {
         println!("{:?}", arg);
     }
 
-    MYSQLBuilder::query().insert(tb("user")).add(
-        vec!["name".to_string(), "age".to_string(), "active".to_string()],
-        vec![
-            vec![arg("Jake"), arg(23), arg(false)],
-            vec![arg("Sally"), arg(42), arg(true)],
-            vec![arg("Jasper"), arg(18), arg(true)],
-        ],
-    );
+    let (queryy, argss) = MYSQLBuilder::query()
+        .insert(tb("user"))
+        .rows(
+            vec!["name", "age", "active"],
+            vec![
+                vec![arg("Jake"), arg(23), arg(false)],
+                vec![arg("Sally"), arg(42), arg(true)],
+                vec![arg("Jasper"), arg(18), arg(true)],
+            ],
+        )
+        .to_sql();
+
+    println!("\n{queryy}\n");
+    for arg in argss {
+        println!("{:?}", arg);
+    }
 }

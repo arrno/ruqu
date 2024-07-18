@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use crate::args::*;
 use crate::mysql::*;
 use crate::table::*;
@@ -36,7 +38,14 @@ impl Insert {
 }
 impl ToSQL for Insert {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
-        let key_query = format!("({})", self.keys.join(", "));
+        let key_query = format!(
+            "({})",
+            self.keys
+                .iter()
+                .map(|k| format!("`{k}`"))
+                .collect::<Vec<String>>()
+                .join(", ")
+        );
         let values_query = (0..self.values.len())
             .map(|_| {
                 format!(
@@ -49,7 +58,11 @@ impl ToSQL for Insert {
             })
             .collect::<Vec<String>>()
             .join(",\n");
-        (format!("{key_query} VALUES\n {values_query}"), None)
+        let mut args = Vec::new();
+        self.values
+            .iter()
+            .for_each(|set| set.iter().for_each(|val| args.push(val.clone())));
+        (format!("{key_query} \nVALUES\n {values_query}"), Some(args))
     }
 }
 

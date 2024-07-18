@@ -154,8 +154,11 @@ impl InsertQBuilder for MYSQLBuilder {
         self.query_type = QueryType::Insert;
         self
     }
-    fn add(mut self, keys: Vec<String>, values: Vec<Vec<Arg>>) -> Self {
-        self.insert = Some(Insert::new(keys, values));
+    fn rows(mut self, keys: Vec<&'static str>, values: Vec<Vec<Arg>>) -> Self {
+        self.insert = Some(Insert::new(
+            keys.iter().map(|k| k.to_string()).collect(),
+            values,
+        ));
         self
     }
 }
@@ -226,7 +229,12 @@ impl MYSQLBuilder {
     }
 
     fn to_insert_sql(&self) -> (String, Vec<Arg>) {
-        (String::from(""), vec![])
+        let mut args = Vec::new();
+        let (from_query, from_args) = self.unpack_element(&self.from);
+        let (column_query, column_args) = self.unpack_element(&self.insert);
+        args.extend(from_args);
+        args.extend(column_args);
+        (format!("INSERT INTO {from_query} {column_query}"), args)
     }
 
     fn to_delete_sql(&self) -> (String, Vec<Arg>) {
