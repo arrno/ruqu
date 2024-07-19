@@ -11,14 +11,16 @@ impl Set {
 }
 impl ToSQL for Set {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
-        (
-            self.0
-                .iter()
-                .map(|e| e.to_sql().0)
-                .collect::<Vec<String>>()
-                .join(", "),
-            None,
-        )
+        let mut sql_statements = vec![];
+        let mut args = vec![];
+        self.0.iter().for_each(|e| {
+            let (sql, op) = e.to_sql();
+            sql_statements.push(sql);
+            if let Some(a) = op {
+                args.extend(a);
+            }
+        });
+        (sql_statements.join(", "), Some(args))
     }
 }
 
@@ -108,12 +110,12 @@ impl ToSQL for Exp {
                 let mut args = vec![];
                 v.iter().for_each(|e| {
                     let (s, a) = e.to_sql();
-                    sql.push(s);
+                    sql.push(format!("({s})"));
                     if let Some(v) = a {
                         args.extend(v);
                     }
                 });
-                (format!("({})", sql.join(" AND ")), Some(args))
+                (format!("{}", sql.join(" AND ")), Some(args))
             }
         }
     }
@@ -162,7 +164,7 @@ impl ToSQL for And {
         if let Some(a) = right_args {
             args.extend(a);
         }
-        (format!("({left_exp} AND {right_exp})"), Some(args))
+        (format!("({left_exp}) AND ({right_exp})"), Some(args))
     }
 }
 
@@ -182,7 +184,7 @@ impl ToSQL for Or {
         if let Some(a) = right_args {
             args.extend(a);
         }
-        (format!("({left_exp} OR {right_exp})"), Some(args))
+        (format!("({left_exp}) OR ({right_exp})"), Some(args))
     }
 }
 
@@ -235,7 +237,7 @@ impl ToSQL for ExpTar {
             ExpTar::C(col) => (col.to_sql().0, None),
             ExpTar::T(sub_query_builder) => {
                 let (sub_query, sub_args) = sub_query_builder.to_sql();
-                (format!("({sub_query})"), Some(sub_args))
+                (format!("{sub_query}"), Some(sub_args))
             }
         }
     }
@@ -265,6 +267,6 @@ impl ToSQL for ExpU {
             args.push(v[0].clone())
         }
         let (op_sql, _) = self.op.to_sql();
-        (format!("({left} {op_sql} {right})"), Some(args))
+        (format!("{left} {op_sql} {right}"), Some(args))
     }
 }

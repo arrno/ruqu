@@ -73,4 +73,21 @@ fn main() {
     for arg in argsss {
         println!("{:?}", arg);
     }
+
+    let (queryyyy, argssss) = MYSQLBuilder::query()
+        .update(tb("user"))
+        .set(vec![
+            cl("user", "active").eq(true),
+            cl("user", "score").eq(100),
+        ])
+        .r#where(Exp::exp_and(
+            cl("user", "name").like("%ally"),
+            cl("user", "deleted").is_null(),
+        ))
+        .to_sql();
+
+    println!("\n{queryyyy}\n");
+    for arg in argssss {
+        println!("{:?}", arg);
+    }
 }

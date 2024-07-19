@@ -93,6 +93,34 @@ DELETE FROM `user` WHERE (`user`.`active` != ?)
 -- Bool(true)
 ```
 
+### Update
+
+```rust
+let (query, args) = MYSQLBuilder::query()
+    .update(tb("user"))
+    .set(vec![
+        cl("user", "active").eq(true),
+        cl("user", "score").eq(100),
+    ])
+    .r#where(Exp::exp_and(
+        cl("user", "name").like("%ally"),
+        cl("user", "deleted").is_null(),
+    ))
+    .to_sql();
+```
+
+produces:
+
+```sql
+UPDATE `user` 
+SET `user`.`active` = ?, `user`.`score` = ?
+WHERE ((`user`.`name` LIKE ?) AND (`user`.`deleted` IS NULL))
+
+-- Bool(true)
+-- Int(100)
+-- Str("%ally")
+```
+
 ## Todo
 
 - ~~Limit, GroupBy, Having~~
@@ -104,4 +132,5 @@ DELETE FROM `user` WHERE (`user`.`active` != ?)
     - ~~GroupConcat(Distinct, Order)~~
     - ~~Instr~~
     - ~~Coalesce~~
-- Update, Insert, Delete
+- ~~Update, Insert, Delete~~
+- Testing

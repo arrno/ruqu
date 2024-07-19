@@ -222,10 +222,17 @@ impl MYSQLBuilder {
         (query, args)
     }
 
-    // TODO
     fn to_update_sql(&self) -> (String, Vec<Arg>) {
-        // UPDATE {from} SET {set} WHERE {where};
-        (String::from(""), vec![])
+        let (from_query, mut args) = self.unpack_element(&self.from);
+        let (set_query, set_args) = self.unpack_element(&self.set);
+        args.extend(set_args);
+        let mut query = format!("UPDATE {from_query} \nSET {set_query}");
+        let (where_query, where_args) = self.unpack_element(&self.r#where);
+        if where_query.len() > 0 {
+            query.push_str(format!("\n{where_query}").as_str());
+            args.extend(where_args);
+        }
+        (query, args)
     }
 
     fn to_insert_sql(&self) -> (String, Vec<Arg>) {

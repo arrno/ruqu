@@ -122,7 +122,7 @@ impl Col {
     pub fn gt<T: ToExpTar>(&self, exp: T) -> Exp {
         self.make_exp(exp.to_exp_tar(), Op::Gt)
     }
-    pub fn like(&self, search: String) -> Exp {
+    pub fn like(&self, search: &'static str) -> Exp {
         self.make_exp(search.to_exp_tar(), Op::Like)
     }
     pub fn r#in<T: ToExpTar>(&self, exp: T) -> Exp {

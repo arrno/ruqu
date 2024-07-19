@@ -159,7 +159,7 @@ impl On {
 impl ToSQL for On {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let (exp_sql, exp_args) = self.exp.to_sql();
-        (format!("ON {exp_sql}"), exp_args)
+        (format!("ON ({exp_sql})"), exp_args)
     }
 }
 pub struct Where {
@@ -174,7 +174,7 @@ impl Where {
 impl ToSQL for Where {
     fn to_sql(&self) -> (String, Option<Vec<Arg>>) {
         let (exp_sql, exp_args) = self.exp.to_sql();
-        (format!("WHERE {exp_sql}"), exp_args)
+        (format!("WHERE ({exp_sql})"), exp_args)
     }
 }
 
