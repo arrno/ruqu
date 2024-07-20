@@ -7,7 +7,7 @@ This project is intended to replicate the features of [this project](https://dou
 ```rust
 let (query, args) = MYSQLBuilder::query()
     .from("user")
-    .select(vec![cl("user", "id"), cl("user", "name")])
+    .select(vec![cl("user", "name"), cl("user", "date")])
     .distinct()
     .join(
         tb("comment"),
@@ -23,7 +23,7 @@ let (query, args) = MYSQLBuilder::query()
         ),
         cl("comment", "likes").eq(cl("comment", "dislikes")),
     ]))
-    .order(cl("user", "join_date"), Dir::Asc)
+    .order(cl("user", "date"), Dir::Asc)
     .limit(5)
     .to_sql();
 ```
@@ -31,11 +31,11 @@ let (query, args) = MYSQLBuilder::query()
 produces:
 
 ```sql
-SELECT DISTINCT `user`.`id`, `user`.`name`
+SELECT DISTINCT `user`.`name`, `user`.`date`
 FROM `user`
 JOIN `comment` ON ((`comment`.`user_id` = `user`.`id`) AND (`comment`.`deleted` IS NULL))
 WHERE (((`user`.`active` = ?) OR (`user`.`score` > ?)) AND (`comment`.`likes` = `comment`.`dislikes`))
-ORDER BY `user`.`join_date` ASC
+ORDER BY `user`.`date` ASC
 LIMIT 5
 
 -- Bool(true)
