@@ -121,16 +121,67 @@ WHERE ((`user`.`name` LIKE ?) AND (`user`.`deleted` IS NULL))
 -- Str("%ally")
 ```
 
-## Todo
-
-- ~~Limit, GroupBy, Having~~
-- ~~Select distinct~~
-- ~~Union Join~~
-- ~~ColumnFunctions~~: 
-    - ~~Count(Distinct)~~
-    - ~~Sum, Max, Min, Avg~~
-    - ~~GroupConcat(Distinct, Order)~~
-    - ~~Instr~~
-    - ~~Coalesce~~
-- ~~Update, Insert, Delete~~
-- Testing
+## Features
+- Query
+    - from
+    - select
+    - select.distinct
+    - tb (table)
+    - cl (column)
+    - cl.as_alias
+    - [RECURSIVE]
+        - max
+        - min
+        - count
+        - sum
+        - avg
+        - instr
+        - concat (group_concat)
+        - coalesce
+        - cl.distinct
+    - join
+    - left_join
+    - right_join
+    - union
+    - where
+    - group_by
+    - having
+    - order
+        - Dir::Asc
+        - Dir::Desc
+    - limit
+- Expressions
+    - where
+    - On
+    - [RECURSIVE]
+        - ExpU (simple expression unit)
+        - Exp::Set (MULTI AND)
+        - Exp::exp_and
+        - Exp::exp_or
+    - [COLUMN EXP]
+        - eq
+        - neq
+        - gt (greater than)
+        - lt (less than)
+        - like
+        - in
+        - is_null
+        - is_not_null
+- Update
+    - update
+    - set
+    - where
+- Insert
+    - insert
+    - rows
+- Delete
+    - delete
+    - where
+- Args
+    - Uint
+    - Int
+    - Bool
+    - Str
+    - Float
+    - Set
+    - Null
