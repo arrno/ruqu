@@ -183,5 +183,5 @@ WHERE ((`user`.`name` LIKE ?) AND (`user`.`deleted` IS NULL))
     - Bool
     - Str
     - Float
-    - Set
+    - Set<Arg>
     - Null
